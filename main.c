@@ -6,13 +6,15 @@ int main(int argc, char *argv[])
     initBak();
     // The window is open: could enter program loop here (see SDL_PollEvent())
 
-    dinoStatus = 0;
+    dinoStatus = 1;
 
     int quit = 1;
     SDL_Event event;
 
     do
     {
+        Uint64 start = SDL_GetPerformanceCounter();
+
         paintevent();
 
         SDL_PollEvent(&event);
@@ -22,20 +24,34 @@ int main(int argc, char *argv[])
             SDL_Log("Event type is %d", event.type);
             quit = 0;
         case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_SPACE || event.key.keysym.sym == SDLK_UP)
+            if (dinoStatus != 3 && (event.key.keysym.sym == SDLK_SPACE || event.key.keysym.sym == SDLK_UP))
             {
                 SDL_Log("Event type is %d", event.type);
-                dinoJumpHeight = 300;
+                dinoStatus = 2;
             }
+            else if (event.key.keysym.sym == SDLK_ESCAPE)
+            {
+                quit = 0;
+            }
+
             else if (event.key.keysym.sym == SDLK_s || event.key.keysym.sym == SDLK_DOWN)
             {
                 SDL_Log("Event type is %d", event.type);
                 dinoJumpHeight = 200;
             }
+            break;
         default:
             // SDL_Log("Event type is %d", event.type);
             break;
         }
+
+        Uint64 end = SDL_GetPerformanceCounter();
+
+        float elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
+        SDL_Log("current FPS,%f.6", 16.666f - elapsedMS);
+        // Cap to 60 FPS
+        SDL_Delay((float)(16.666f - elapsedMS));
+
     } while (quit);
 
     /* Make sure to eventually release the surface resource */
@@ -126,9 +142,7 @@ void initBak()
         SDL_WINDOWPOS_CENTERED, // initial y position
         WIDTH,                  // width, in pixels
         HEIGHT,                 // height, in pixels
-        SDL_WINDOW_SHOWN
-        //  | SDL_WINDOW_FULLSCREEN_DESKTOP // flags - see below
-    );
+        SDL_WINDOW_SHOWN);
 
     // Check that the window was successfully created
     if (window == NULL)
@@ -148,18 +162,61 @@ void initBak()
 }
 void dino_run()
 {
+    if (dinoRunningStatus == 2)
+    {
+        dinoRunningStatus = 0;
+    }
     // SDL_FillRect(message, NULL, 0x000000);
-    apply_dino(200, HEIGHT - dinoJumpHeight, dinoRun[dinoStatus], 0, 87, 94, message, surface);
+    apply_dino(200, HEIGHT - dinoJumpHeight, dinoRun[dinoRunningStatus], 0, 87, 94, message, surface);
+    dinoRunningStatus++;
     // 更新窗口并显示
     SDL_UpdateWindowSurface(window);
 }
 void paintevent()
 {
-    if (dinoStatus == 2)
-        dinoStatus = 0;
 
     apply_surface(0, 0, background, surface);
-    dino_run();
 
-    dinoStatus++;
+    drawRoad();
+    if (dinoStatus == 2 || dinoStatus == 3)
+    {
+        dinoJump();
+    }
+
+    dino_run();
+}
+
+void drawRoad()
+{
+    // SDL_FillRect(message, NULL, 0x000000);
+    apply_dino(20, HEIGHT * 6 / 7, 0, 104, 2000, 30, message, surface);
+}
+
+void dinoJump()
+{
+    switch (dinoStatus)
+    {
+    case 2:
+        if (dinoJumpHeight < 300)
+        {
+            dinoJumpHeight += 5;
+        }
+        else
+        {
+            dinoStatus = 3;
+        }
+        break;
+    case 3:
+        if (dinoJumpHeight > 200)
+        {
+            dinoJumpHeight -= 5;
+        }
+        else
+        {
+            dinoStatus = 1;
+        }
+        break;
+    default:
+        break;
+    }
 }
