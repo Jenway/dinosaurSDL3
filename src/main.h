@@ -20,6 +20,11 @@ SDL_Renderer *renderer = NULL;
 SDL_Surface *background = NULL;
 SDL_Surface *message = NULL;
 SDL_Surface *surface = NULL;
+SDL_Texture *texture =NULL;
+    // 新建一个临时的矩形来保存偏移量
+    SDL_Rect offset;
+    // 切割原图用的矩形
+    SDL_Rect cutset,cutRect;
 
 // 加载图片
 SDL_Surface *LoadImage(const char *file);

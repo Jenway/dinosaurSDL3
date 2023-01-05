@@ -104,10 +104,8 @@ SDL_Surface *LoadImage(const char *file)
 
 void apply_surface(int x, int y, SDL_Surface *source, SDL_Surface *destination)
 {
-    // 新建一个临时的矩形来保存偏移量
-    SDL_Rect offset;
-    // 切割原图用的矩形
-    SDL_Rect cutset;
+    texture = SDL_CreateTextureFromSurface(renderer, source);
+
     cutset.x = 0;
     cutset.y = 0;
     cutset.w = WIDTH;
@@ -118,26 +116,27 @@ void apply_surface(int x, int y, SDL_Surface *source, SDL_Surface *destination)
     offset.w = WIDTH;
     offset.h = HEIGHT;
     // 执行表面的Blit
-    SDL_BlitSurface(source, &cutset, destination, &offset);
+    // SDL_BlitSurface(source, &cutset, destination, &offset);
+    SDL_RenderClear(renderer);
+
+    SDL_RenderCopy(renderer, texture, &cutset, &offset);
 }
 
 void apply_dino(int x, int y, int x2, int y2, int w, int h, SDL_Surface *source, SDL_Surface *destination)
 {
-    // 新建一个临时的矩形来保存偏移量
-    SDL_Rect offset;
-    // 切割原图
-    SDL_Rect cutRect;
-
     // 将传入的偏移量保存到矩形中
     offset.x = x;
     offset.y = y;
+    offset.w = w;
+    offset.h = h;
 
     cutRect.x = x2;
     cutRect.y = y2;
     cutRect.w = w;
     cutRect.h = h;
     // 执行表面的Blit
-    SDL_BlitSurface(source, &cutRect, destination, &offset);
+    // SDL_BlitSurface(source, &cutRect, destination, &offset);
+    SDL_RenderCopy(renderer, texture, &cutRect, &offset);
 }
 
 void initBak()
@@ -162,13 +161,14 @@ void initBak()
     }
 
     /* We must call SDL_CreateRenderer in order for draw calls to affect this window. */
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     // 设置背景
     background = LoadImage(BAKIMG_PATH);
     // 设置恐龙
     message = LoadImage(DINO_PATH);
+    texture = SDL_CreateTextureFromSurface(renderer, message);
 
-    surface = SDL_GetWindowSurface(window);
+    // surface = SDL_GetWindowSurface(window);
 }
 void dino_run()
 {
@@ -186,17 +186,14 @@ void dino_run()
     {
         apply_dino(20, HEIGHT + FOOTHEIGHT - dinoJumpHeight, dinoRun[2], 0, 87, 94, message, surface);
     }
-
-    // 更新窗口并显示
-    SDL_UpdateWindowSurface(window);
 }
 void paintevent()
 {
 
-    apply_surface(0, 0, background, surface);
-
+    // apply_surface(0, 0, background, surface);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderClear(renderer); // 清空渲染器
     drawCloud();
-
     drawRoad();
     if (dinoStatus == 2 || dinoStatus == 3)
     {
@@ -204,6 +201,10 @@ void paintevent()
     }
 
     dino_run();
+    // apply_dino(20, 200, dinoRun[2], 0, 87, 94, message, NULL);
+    // 更新窗口并显示
+    // SDL_UpdateWindowSurface(window);
+    SDL_RenderPresent(renderer);
 }
 
 void drawRoad()
@@ -222,6 +223,8 @@ void drawRoad()
 
     // SDL_FillRect(message, NULL, 0x000000);
     apply_dino(0, HEIGHT - 25, roadStatus, 104, 2000, 30, message, surface);
+    // 更新窗口并显示
+    SDL_UpdateWindowSurface(window);
 }
 
 void drawCloud()
@@ -231,16 +234,17 @@ void drawCloud()
     {
         cloudStaatus -= ROADSPEED;
     }
-    else{
+    else
+    {
         cloudStaatus = 1500;
     }
-    
+
     apply_dino(cloudStaatus, CLOUDHEIGHT, 165, 2, 93, 27, message, surface);
-    apply_dino(cloudStaatus+800, CLOUDHEIGHT+30, 165, 2, 93, 27, message, surface);
-    apply_dino(cloudStaatus+600, CLOUDHEIGHT+60, 165, 2, 93, 27, message, surface);
-    apply_dino(cloudStaatus-400, CLOUDHEIGHT+50, 165, 2, 93, 27, message, surface);
-    apply_dino(cloudStaatus-300, CLOUDHEIGHT-50, 165, 2, 93, 27, message, surface);
-    apply_dino(cloudStaatus-700, CLOUDHEIGHT-50, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus + 800, CLOUDHEIGHT + 30, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus + 600, CLOUDHEIGHT + 60, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus - 400, CLOUDHEIGHT + 50, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus - 300, CLOUDHEIGHT - 50, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus - 700, CLOUDHEIGHT - 50, 165, 2, 93, 27, message, surface);
 }
 
 void dinoJump()
