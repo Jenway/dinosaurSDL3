@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
         case SDL_QUIT:
             SDL_Log("Event type is %d", event.type);
             quit = 0;
+            break;
         case SDL_KEYDOWN:
             if (dinoStatus != 3 && (event.key.keysym.sym == SDLK_SPACE || event.key.keysym.sym == SDLK_UP))
             {
@@ -31,28 +32,29 @@ int main(int argc, char *argv[])
             }
             else if (event.key.keysym.sym == SDLK_ESCAPE)
             {
+                SDL_Log("Event type is %d", event.type);
                 quit = 0;
             }
 
             else if (event.key.keysym.sym == SDLK_s || event.key.keysym.sym == SDLK_DOWN)
             {
                 SDL_Log("Event type is %d", event.type);
-                dinoJumpHeight = 200;
             }
             break;
         default:
             // SDL_Log("Event type is %d", event.type);
             break;
         }
+        // SDL_Log("CLOUDS: %d",cloudStaatus);
 
         Uint64 end = SDL_GetPerformanceCounter();
 
         float elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
-        SDL_Log("current FPS,%f.6", 16.666f - elapsedMS);
+        // SDL_Log("current FPS,%f.6", 16.666f - elapsedMS);
         // Cap to 60 FPS
         SDL_Delay((float)(16.666f - elapsedMS));
 
-    } while (quit);
+    } while (quit == 1);
 
     /* Make sure to eventually release the surface resource */
     SDL_FreeSurface(background);
@@ -104,12 +106,19 @@ void apply_surface(int x, int y, SDL_Surface *source, SDL_Surface *destination)
 {
     // 新建一个临时的矩形来保存偏移量
     SDL_Rect offset;
-
+    // 切割原图用的矩形
+    SDL_Rect cutset;
+    cutset.x = 0;
+    cutset.y = 0;
+    cutset.w = WIDTH;
+    cutset.h = HEIGHT;
     // 将传入的偏移量保存到矩形中
-    offset.x = x;
-    offset.y = y;
+    offset.x = 0;
+    offset.y = 0;
+    offset.w = WIDTH;
+    offset.h = HEIGHT;
     // 执行表面的Blit
-    SDL_BlitSurface(source, NULL, destination, &offset);
+    SDL_BlitSurface(source, &cutset, destination, &offset);
 }
 
 void apply_dino(int x, int y, int x2, int y2, int w, int h, SDL_Surface *source, SDL_Surface *destination)
@@ -122,6 +131,7 @@ void apply_dino(int x, int y, int x2, int y2, int w, int h, SDL_Surface *source,
     // 将传入的偏移量保存到矩形中
     offset.x = x;
     offset.y = y;
+
     cutRect.x = x2;
     cutRect.y = y2;
     cutRect.w = w;
@@ -162,13 +172,21 @@ void initBak()
 }
 void dino_run()
 {
-    if (dinoRunningStatus == 2)
+    if (dinoStatus == 1)
     {
-        dinoRunningStatus = 0;
+        if (dinoRunningStatus >= 2)
+        {
+            dinoRunningStatus = 0;
+        }
+        // SDL_FillRect(message, NULL, 0x000000);
+        apply_dino(20, HEIGHT + FOOTHEIGHT - dinoJumpHeight, dinoRun[dinoRunningStatus], 0, 87, 94, message, surface);
+        dinoRunningStatus++;
     }
-    // SDL_FillRect(message, NULL, 0x000000);
-    apply_dino(200, HEIGHT - dinoJumpHeight, dinoRun[dinoRunningStatus], 0, 87, 94, message, surface);
-    dinoRunningStatus++;
+    else if (dinoStatus == 2 || dinoStatus == 3)
+    {
+        apply_dino(20, HEIGHT + FOOTHEIGHT - dinoJumpHeight, dinoRun[2], 0, 87, 94, message, surface);
+    }
+
     // 更新窗口并显示
     SDL_UpdateWindowSurface(window);
 }
@@ -176,6 +194,8 @@ void paintevent()
 {
 
     apply_surface(0, 0, background, surface);
+
+    drawCloud();
 
     drawRoad();
     if (dinoStatus == 2 || dinoStatus == 3)
@@ -188,8 +208,39 @@ void paintevent()
 
 void drawRoad()
 {
+    if (dinoStatus != 0)
+    {
+        if (roadStatus < 1600)
+        {
+            roadStatus += ROADSPEED;
+        }
+        else
+        {
+            roadStatus = 0;
+        } /* code */
+    }
+
     // SDL_FillRect(message, NULL, 0x000000);
-    apply_dino(20, HEIGHT * 6 / 7, 0, 104, 2000, 30, message, surface);
+    apply_dino(0, HEIGHT - 25, roadStatus, 104, 2000, 30, message, surface);
+}
+
+void drawCloud()
+{
+
+    if (cloudStaatus >= -800)
+    {
+        cloudStaatus -= ROADSPEED;
+    }
+    else{
+        cloudStaatus = 1500;
+    }
+    
+    apply_dino(cloudStaatus, CLOUDHEIGHT, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus+800, CLOUDHEIGHT+30, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus+600, CLOUDHEIGHT+60, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus-400, CLOUDHEIGHT+50, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus-300, CLOUDHEIGHT-50, 165, 2, 93, 27, message, surface);
+    apply_dino(cloudStaatus-700, CLOUDHEIGHT-50, 165, 2, 93, 27, message, surface);
 }
 
 void dinoJump()
@@ -197,9 +248,9 @@ void dinoJump()
     switch (dinoStatus)
     {
     case 2:
-        if (dinoJumpHeight < 300)
+        if (dinoJumpHeight < 400)
         {
-            dinoJumpHeight += 5;
+            dinoJumpHeight += 10;
         }
         else
         {
@@ -209,7 +260,7 @@ void dinoJump()
     case 3:
         if (dinoJumpHeight > 200)
         {
-            dinoJumpHeight -= 5;
+            dinoJumpHeight -= 10;
         }
         else
         {
