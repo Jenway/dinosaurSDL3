@@ -6,16 +6,68 @@ int main(int argc, char *argv[])
     initBak();
     // The window is open: could enter program loop here (see SDL_PollEvent())
 
-    dinoStatus = 1;
-
+    dinoStatus = 0;
     int quit = 1;
     SDL_Event event;
-
-    do
+    paintevent();
+    while (gameStart == 1)
     {
-        Uint64 start = SDL_GetPerformanceCounter();
+        SDL_PollEvent(&event);
+        keyarr = SDL_GetKeyboardState(NULL);
+        switch (event.type)
+        {
+        case SDL_QUIT:
+            SDL_Log("Event type is %d", event.type);
+            gameEnd();
+            break;
+        default:
+            break;
+        }
+        if (keyarr[SDL_SCANCODE_SPACE] == 1 || keyarr[SDL_SCANCODE_W] || keyarr[SDL_SCANCODE_UP])
+        {
+            SDL_Log("w is pressed!");
+            dinoStatus = 2;
+            gameStart = 0;
+        }
+        else if (keyarr[SDL_SCANCODE_ESCAPE] == 1)
+        {
+            quit = 0;
+        }
+    }
 
-        paintevent();
+    while (quit == 1)
+    {
+
+        if (dinoStatus == 4)
+        {
+
+            if (sitCache < SITFPS)
+            {
+                sitCache += 1;
+            }
+
+            else
+            {
+                sitCache = 0;
+                dinoStatus = 1;
+            }
+        }
+        timeCountPre = SDL_GetTicks();
+
+        keyarr = SDL_GetKeyboardState(NULL);
+        if ((keyarr[SDL_SCANCODE_SPACE] == 1 || keyarr[SDL_SCANCODE_W] || keyarr[SDL_SCANCODE_UP]) && dinoStatus == 1)
+        {
+            SDL_Log("w2 is pressed!");
+            dinoStatus = 2;
+        }
+        else if ((keyarr[SDL_SCANCODE_S] == 1 || keyarr[SDL_SCANCODE_DOWN]) && dinoStatus == 1)
+        {
+            dinoStatus = 4;
+        }
+        else if (keyarr[SDL_SCANCODE_ESCAPE] == 1)
+        {
+            quit = 0;
+        }
 
         SDL_PollEvent(&event);
         switch (event.type)
@@ -24,53 +76,16 @@ int main(int argc, char *argv[])
             SDL_Log("Event type is %d", event.type);
             quit = 0;
             break;
-        case SDL_KEYDOWN:
-            if (dinoStatus != 3 && (event.key.keysym.sym == SDLK_SPACE || event.key.keysym.sym == SDLK_UP))
-            {
-                SDL_Log("Event type is %d", event.type);
-                dinoStatus = 2;
-            }
-            else if (event.key.keysym.sym == SDLK_ESCAPE)
-            {
-                SDL_Log("Event type is %d", event.type);
-                quit = 0;
-            }
-
-            else if (event.key.keysym.sym == SDLK_s || event.key.keysym.sym == SDLK_DOWN)
-            {
-                SDL_Log("Event type is %d", event.type);
-            }
-            break;
         default:
-            // SDL_Log("Event type is %d", event.type);
             break;
         }
-        // SDL_Log("CLOUDS: %d",cloudStaatus);
+        timeCountCur = SDL_GetTicks();
 
-        Uint64 end = SDL_GetPerformanceCounter();
-
-        float elapsedMS = (end - start) / (float)SDL_GetPerformanceFrequency() * 1000.0f;
-        // SDL_Log("current FPS,%f.6", 16.666f - elapsedMS);
-        // Cap to 60 FPS
-        SDL_Delay((float)(16.666f - elapsedMS));
-
-    } while (quit == 1);
-
-    /* Make sure to eventually release the surface resource */
-    SDL_FreeSurface(background);
-    SDL_FreeSurface(message);
-
-    // destory renderer
-    if (renderer)
-    {
-        SDL_DestroyRenderer(renderer);
+        paintevent();
+        SDL_Delay(FramePerSecond - (timeCountCur - timeCountPre));
     }
 
-    // Close and destroy the window
-    SDL_DestroyWindow(window);
-
-    // Clean up
-    SDL_Quit();
+    gameEnd();
     return 0;
 }
 
@@ -163,7 +178,7 @@ void initBak()
     /* We must call SDL_CreateRenderer in order for draw calls to affect this window. */
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     // 设置背景
-    background = LoadImage(BAKIMG_PATH);
+    // background = LoadImage(BAKIMG_PATH);
     // 设置恐龙
     message = LoadImage(DINO_PATH);
     texture = SDL_CreateTextureFromSurface(renderer, message);
@@ -172,6 +187,7 @@ void initBak()
 }
 void dino_run()
 {
+
     if (dinoStatus == 1)
     {
         if (dinoRunningStatus >= 2)
@@ -180,11 +196,37 @@ void dino_run()
         }
         // SDL_FillRect(message, NULL, 0x000000);
         apply_dino(20, HEIGHT + FOOTHEIGHT - dinoJumpHeight, dinoRun[dinoRunningStatus], 0, 87, 94, message, surface);
-        dinoRunningStatus++;
+        if (runCache >=RUNFPS)
+        {
+            dinoRunningStatus++;
+            runCache =0;
+        }
+        else
+        {
+            runCache ++;
+        }
+        
+        
+        
     }
+    else if (dinoStatus == 0)
+    {
+        apply_dino(20, HEIGHT + FOOTHEIGHT - dinoJumpHeight, dinoRun[2], 0, 87, 94, message, surface);
+    }
+
     else if (dinoStatus == 2 || dinoStatus == 3)
     {
         apply_dino(20, HEIGHT + FOOTHEIGHT - dinoJumpHeight, dinoRun[2], 0, 87, 94, message, surface);
+    }
+    else if (dinoStatus == 4)
+    {
+        if (dinoRunningStatus >= 2)
+        {
+            dinoRunningStatus = 0;
+        }
+        // SDL_FillRect(message, NULL, 0x000000);
+        apply_dino(20, HEIGHT + FOOTHEIGHT - dinoJumpHeight, dinoRun[dinoRunningStatus + 3], 0, 118, 94, message, surface);
+        dinoRunningStatus++;
     }
 }
 void paintevent()
@@ -193,8 +235,13 @@ void paintevent()
     // apply_surface(0, 0, background, surface);
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer); // 清空渲染器
-    drawCloud();
-    drawRoad();
+    if (dinoStatus != 0)
+    {
+        drawCloud();
+        drawRoad();
+        drawPlant();
+    }
+
     if (dinoStatus == 2 || dinoStatus == 3)
     {
         dinoJump();
@@ -222,9 +269,7 @@ void drawRoad()
     }
 
     // SDL_FillRect(message, NULL, 0x000000);
-    apply_dino(0, HEIGHT - 25, roadStatus, 104, 2000, 30, message, surface);
-    // 更新窗口并显示
-    SDL_UpdateWindowSurface(window);
+    apply_dino(0, HEIGHT - 25, roadStatus, 104, 800, 30, message, surface);
 }
 
 void drawCloud()
@@ -232,7 +277,7 @@ void drawCloud()
 
     if (cloudStaatus >= -800)
     {
-        cloudStaatus -= ROADSPEED;
+        cloudStaatus -= ROADSPEED / 2;
     }
     else
     {
@@ -247,14 +292,40 @@ void drawCloud()
     apply_dino(cloudStaatus - 700, CLOUDHEIGHT - 50, 165, 2, 93, 27, message, surface);
 }
 
+void drawPlant()
+{
+
+        if (plantStatus >= -8000)
+        {
+            plantStatus -= ROADSPEED;
+        }
+        else
+        {
+            plantStatus = 0;
+        } /* code */
+
+    apply_dino(plantStatus, HEIGHT -PLANTHEIGHT, 446, 2, 28, 70, message, surface); 
+    apply_dino(plantStatus+PLANTLENGTH, HEIGHT-PLANTHEIGHT, 480, 2, 28, 70, message, surface);
+    apply_dino(plantStatus+4*PLANTLENGTH, HEIGHT-PLANTHEIGHT, 514, 2, 28, 70, message, surface);
+    apply_dino(plantStatus+10*PLANTLENGTH, HEIGHT-PLANTHEIGHT, 548, 2, 28, 70, message, surface);
+    apply_dino(plantStatus+11*PLANTLENGTH, HEIGHT-PLANTHEIGHT, 582, 2, 28, 70, message, surface); 
+    apply_dino(plantStatus+14*PLANTLENGTH, HEIGHT-PLANTHEIGHT, 616, 2, 28, 70, message, surface);
+    apply_dino(plantStatus+18*PLANTLENGTH, HEIGHT-PLANTHEIGHT, 648, 2, 28, 70, message, surface);
+
+
+    apply_dino(plantStatus+20*PLANTLENGTH, HEIGHT-PLANTHEIGHT-30, 652, 2, 50, 100, message, surface);
+    apply_dino(plantStatus+9*PLANTLENGTH, HEIGHT-PLANTHEIGHT-30, 702, 2, 50, 100, message, surface);
+    apply_dino(plantStatus+16*PLANTLENGTH, HEIGHT-PLANTHEIGHT-30, 752, 2, 50, 100, message, surface); // 10
+    apply_dino(plantStatus+20*PLANTLENGTH, HEIGHT-PLANTHEIGHT-30, 802, 2, 50, 100, message, surface);
+}
 void dinoJump()
 {
     switch (dinoStatus)
     {
     case 2:
-        if (dinoJumpHeight < 400)
+        if (dinoJumpHeight < DINOFINALHEIGHT)
         {
-            dinoJumpHeight += 10;
+            dinoJumpHeight += ROADSPEED * 2;
         }
         else
         {
@@ -262,16 +333,34 @@ void dinoJump()
         }
         break;
     case 3:
-        if (dinoJumpHeight > 200)
+        if (dinoJumpHeight - ROADSPEED > 200)
         {
-            dinoJumpHeight -= 10;
+            dinoJumpHeight -= ROADSPEED * 2;
         }
         else
         {
+            dinoJumpHeight = 200;
             dinoStatus = 1;
         }
         break;
     default:
         break;
     }
+}
+
+void gameEnd()
+{
+
+    /* Make sure to eventually release the surface resource */
+    // SDL_FreeSurface(background);
+    SDL_FreeSurface(message);
+
+    // destory renderer
+
+    SDL_DestroyRenderer(renderer);
+
+    // Close and destroy the window
+    SDL_DestroyWindow(window);
+    // Clean up
+    SDL_Quit();
 }

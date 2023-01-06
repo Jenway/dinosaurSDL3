@@ -1,4 +1,5 @@
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_keyboard.h"
 #include <stdio.h>
 
 #define DINO_PATH "Resources/dino.bmp"
@@ -8,13 +9,29 @@
 #define FOOTHEIGHT 90
 #define ROADSPEED 10 // 地面移动速度
 #define CLOUDHEIGHT 100
+#define FPS 30
+#define SITFPS 2
+#define RUNFPS 2
+#define PLANTHEIGHT 75
+#define PLANTLENGTH 300
+#define DINOFINALHEIGHT 350
 
-int dinoRun[3] = {1514, 1602, 1338}; // 龙动画在资源中的位置
+Uint32 timeCountPre = 0;
+Uint32 timeCountCur = 0;
+Uint32 FramePerSecond = 1000 /FPS;
+const Uint8* keyarr =NULL;
+
+int dinoRun[5] = {1514, 1602, 1338,1865,1984}; // 龙动画在资源中的位置 // run,run,steady,sit,sit
 int dinoJumpHeight = 200; // 数值参数
 int dinoStatus = 0; // 0 stable,1 running,2 jumpingOn ,3 jumpingOff,4 sitting
 int dinoRunningStatus = 0; // 龙动画阶段
 int roadStatus = 0;//路图像位置
 int cloudStaatus = 800 ; // 云图像位置
+int plantStatus = 800;
+int gameStart =1; //游戏状态
+int sitCache =0; //爬行用
+int runCache =0;
+
 SDL_Window *window = NULL; // Declare a pointer
 SDL_Renderer *renderer = NULL;
 SDL_Surface *background = NULL;
@@ -33,6 +50,8 @@ void apply_dino(int x, int y, int x2, int y2, int w, int h, SDL_Surface *source,
 void dino_run();
 void drawRoad();
 void drawCloud();
+void drawPlant();
 void initBak();
 void paintevent();
 void dinoJump();
+void gameEnd();
