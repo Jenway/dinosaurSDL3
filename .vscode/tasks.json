@@ -11,10 +11,11 @@
                 "-o",
                 "${fileDirname}\\build\\${fileBasenameNoExtension}.exe",
                 "-I",
-                "${workspaceFolder}/include/**", // 头文件所在文件夹
+                "${workspaceFolder}\\include\\**", // 头文件所在文件夹
                 "-lmingw32",
                 "-lSDL2main",
                 "-lSDL2",
+                "-lSDL2_image",
                 "-mwindows"
             ],
             "options": {
