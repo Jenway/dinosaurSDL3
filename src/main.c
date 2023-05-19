@@ -1,4 +1,4 @@
-#include "src/main.h"
+#include "../include/main.h"
 
 int main(int argc, char *argv[])
 {
@@ -430,7 +430,7 @@ void judge()
     plantAttack[3] = plantStatus + 10 * PLANTLENGTH;
     plantAttack[4] = plantStatus + 11 * PLANTLENGTH;
     plantAttack[5] = plantStatus + 14 * PLANTLENGTH;
-    for (size_t i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++)
     {
 
         if ((abs(plantAttack[i] - 107) < 4) && dinoJumpHeight <= 290)

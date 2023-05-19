@@ -1,11 +1,11 @@
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_keyboard.h"
-#include "SDL_image.h"
+#include "../lib/SDL2/SDL.h"
+#include "../lib/SDL2/SDL_keyboard.h"
+#include "../lib/SDL2/SDL_image.h"
 #include <stdio.h>
 #include <math.h>
 
-#define DINO_PATH "Resources/dino.png"
-#define BAKIMG_PATH "Resources/bak.png"
+#define DINO_PATH "resource/dino.png"
+#define BAKIMG_PATH "resource/bak.png"
 #define WIDTH 800
 #define HEIGHT 300
 #define FOOTHEIGHT 90

@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "sdl.h": "c",
-        "main.h": "c",
-        "stdio.h": "c",
-        "sdl_keyboard.h": "c",
-        "sdl_image.h": "c"
-    }
-}
