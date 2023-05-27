@@ -1,15 +1,14 @@
 #if !defined(_DINO_H_)
 #define _DINO_H_
 
-
 #include <SDL_render.h>
 #include <stdbool.h>
 
 typedef struct dino {
     bool Alive;
-    bool OnJump;
+    bool OnAir;
     bool OnCrawl;
-    int speed;
+    int y_velocity;
     SDL_Rect position;
     SDL_Rect collision_box;
     // frame
@@ -17,7 +16,7 @@ typedef struct dino {
     // dino frame timer
     Uint32 frame_timer;
     // Texture
-    SDL_Texture* texture[3];
+    SDL_Texture* texture[4];
 } Dino;
 
 bool Dino_Load(SDL_Renderer* renderer);
@@ -33,9 +32,8 @@ SDL_Rect Dino_Get_Collision();
 bool Dino_Alive();
 void Dino_Jump();
 void Dino_Crawl();
+void Dino_DeCrawl();
 void Dino_Update_POS();
 void dino_run();
-void dinoJump();
-void dinoQuickdown();
 
 #endif // _DINO_H_

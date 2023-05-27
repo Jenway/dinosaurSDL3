@@ -1,12 +1,11 @@
 #if !defined(__GAME_H__)
 #define __GAME_H__
+#include "SDL2/SDL_events.h"
 #include "SDL2/SDL_rect.h"
 #include "SDL2/SDL_render.h"
 #include "SDL2/SDL_surface.h"
 #include "SDL2/SDL_video.h"
-#include <SDL_events.h>
 #include <stdbool.h>
-
 
 typedef struct game {
     SDL_Window* window;
@@ -15,29 +14,10 @@ typedef struct game {
     SDL_Surface* road;
     SDL_Surface* cloud;
     SDL_Surface* plant;
-
-    // SDL_Rect position;
-    // int speed;
-
-    // SDL_Surface* background;
-    // SDL_Surface* message;
-    // SDL_Surface* surface;
-    // SDL_Texture* texture;
-    // SDL_Rect offset;
-    // SDL_Rect cutset, cutRect;
-    // int dinoRun[5];
-    // int dinoJumpHeight;
-    // int dinoStatus;
-    // int dinoRunningStatus;
-    // int roadStatus;
-    // int cloudStaatus;
-    // int plantStatus;
-    // int gameStart;
-    // int sitCache;
-    // int runCache;
-    // int dinoAirCache;
-    // int plantAttack[6];
-
+    // keyboard state
+    bool SPACE_pressed;
+    bool DOWN_pressed;
+    bool GAME_isOVER;
     Uint32 FramePerSecond;
     const Uint8* keyarr;
 } Game;

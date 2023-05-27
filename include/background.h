@@ -2,8 +2,6 @@
 #define __BACKGROUND_H__
 #include "SDL2/SDL_rect.h"
 #include "SDL2/SDL_render.h"
-#include "SDL2/SDL_surface.h"
-#include "main.h"
 #include <stdbool.h>
 
 typedef struct background {
@@ -12,20 +10,8 @@ typedef struct background {
     int speed;
 
     SDL_Texture* texture;
-    SDL_Surface* surface;
     SDL_Rect offset;
     SDL_Rect cutset, cutRect;
-    // int dinoRun[5];
-    // int dinoJumpHeight;
-    // int dinoStatus;
-    // int dinoRunningStatus;
-    // int roadStatus;
-    // int cloudStaatus;
-    // int plantStatus;
-    // int gameStart;
-    // int sitCache;
-    // int runCache;
-    // int dinoAirCache;
 
     Uint32 FramePerSecond;
     const Uint8* keyarr;

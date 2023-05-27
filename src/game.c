@@ -1,12 +1,17 @@
 #include "../include/game.h"
 #include "../include/background.h"
+#include "../include/data.h"
 #include "../include/dino.h"
 #include "../include/obstacle.h"
-
+#include "SDL_keycode.h"
+#include "SDL_scancode.h"
 #include <SDL_events.h>
 #include <SDL_log.h>
 #include <SDL_render.h>
 #include <SDL_timer.h>
+#include <stdbool.h>
+
+Game game;
 
 bool Game_Load(SDL_Renderer* renderer)
 {
@@ -22,11 +27,11 @@ bool Game_Load(SDL_Renderer* renderer)
         return false;
     }
 
-    // // 加载障碍物
-    // if (!Obstacle_Load(renderer)) {
-    //     SDL_Log("Failed to load obstacle");
-    //     return false;
-    // }
+    // 加载障碍物
+    if (!Obstacle_Load(renderer)) {
+        SDL_Log("Failed to load obstacle");
+        return false;
+    }
 
     // // 加载音效
     // if (!Sound_Load()) {
@@ -63,6 +68,7 @@ void Game_loop(SDL_Renderer* renderer)
     SDL_Event event;
 
     while (!quit) {
+        int Begin_Tick = SDL_GetTicks();
         // 处理事件
         Game_Event(&event, &quit);
         // 更新游戏状态
@@ -71,14 +77,22 @@ void Game_loop(SDL_Renderer* renderer)
         Game_Draw(renderer);
         // 显示画面
         SDL_RenderPresent(renderer);
-        // 延时
-        SDL_Delay(1000 / 60);
+        int End_Tick = SDL_GetTicks(); // 获得事件结束Tick
+        int Delay_time = 1000 / FPS - (End_Tick - Begin_Tick);
+        if (Delay_time < 0)
+            Delay_time = 0;
+        SDL_Delay(Delay_time);
+        //  延时
+        // SDL_Delay(FRAMEPERSECOND);
     }
 }
 
 void Game_Init()
 {
     // 初始化游戏状态
+    game.GAME_isOVER = false;
+    game.DOWN_pressed = false;
+    game.SPACE_pressed = false;
     Background_Init();
     Dino_Init();
     Obstacle_Init();
@@ -98,34 +112,47 @@ void Game_Reset()
 
 void Game_Event(SDL_Event* event, bool* quit)
 {
-    while (SDL_PollEvent(event)) {
+    if (SDL_PollEvent(event)) {
+        SDL_KeyCode INPUT = event->key.keysym.sym;
         switch (event->type) {
         case SDL_QUIT:
             *quit = true;
+            SDL_Log("SDL_QUIT");
             break;
         case SDL_KEYDOWN:
-            switch (event->key.keysym.sym) {
-            case SDLK_SPACE:
-                if (!Dino_Alive()) {
-                    Dino_Init();
-                    Obstacle_Init();
-                    // Score_Init();
-                    // Gameover_Init();
+            if (INPUT == SDLK_SPACE || INPUT == SDLK_w || INPUT == SDLK_UP) {
+                if (!game.SPACE_pressed) {
+                    game.SPACE_pressed = true;
                 }
-                Dino_Jump();
-                break;
-            case SDLK_DOWN:
-                if (!Dino_Alive()) {
-                    Dino_Init();
-                    Obstacle_Init();
-                    // Score_Init();
-                    // Gameover_Init();
+            } else if (INPUT == SDLK_DOWN || INPUT == SDLK_s) {
+                if (!game.DOWN_pressed) {
+                    game.DOWN_pressed = true;
                 }
-                Dino_Crawl();
-                break;
+            } else if (INPUT == SDLK_ESCAPE) {
+                game.GAME_isOVER = true;
+                *quit = true;
             }
             break;
+        case SDL_KEYUP:
+            if (INPUT == SDLK_SPACE || INPUT == SDLK_w || INPUT == SDLK_UP) {
+                game.SPACE_pressed = false;
+
+            } else if (INPUT == SDLK_DOWN || INPUT == SDLK_s) {
+                game.DOWN_pressed = false;
+                Dino_DeCrawl();
+            }
+            break;
+        default:
+            break;
         }
+    }
+    if (game.SPACE_pressed) {
+        Dino_Jump();
+        SDL_Log("DINO JUMP");
+    }
+    if (game.DOWN_pressed) {
+        Dino_Crawl();
+        SDL_Log("DINO CRAWL");
     }
 }
 
@@ -133,7 +160,7 @@ void Game_Update(bool* quit)
 {
     // 更新游戏状态
     Background_Update();
-    SDL_Log("Background_Update");
+    // SDL_Log("Background_Update");
     Dino_Update();
     // Obstacle_Update();
     // Score_Update();
@@ -148,8 +175,8 @@ void Game_Update(bool* quit)
 void Game_Draw(SDL_Renderer* renderer)
 {
     // 绘制游戏画面
+    SDL_SetRenderDrawColor(renderer, 32, 33, 36, 255);
     SDL_RenderClear(renderer);
-    
     Background_Draw(renderer);
     Dino_Draw(renderer);
     Obstacle_Draw(renderer);
