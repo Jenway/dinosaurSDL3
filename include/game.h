@@ -8,24 +8,28 @@
 #include <stdbool.h>
 
 typedef struct game {
-    SDL_Window* window;
-    SDL_Renderer* renderer;
-    SDL_Surface* dino;
-    SDL_Surface* road;
-    SDL_Surface* cloud;
-    SDL_Surface* plant;
     // keyboard state
     bool SPACE_pressed;
     bool DOWN_pressed;
     bool GAME_isOVER;
-    Uint32 FramePerSecond;
-    const Uint8* keyarr;
+    // game score
+    bool crashed;
+    bool paused;
+    bool playing;
+    bool isRunning;
+    int time;
 } Game;
 
 bool Game_Load(SDL_Renderer* renderer);
 void Game_loop(SDL_Renderer* renderer);
 void Game_Init();
 void Game_Reset();
+void Game_handleEvent(SDL_Event* event, bool* quit);
+
+void Game_OnKeyDown(SDL_KeyCode INPUT);
+void Game_OnKeyUp(SDL_KeyCode INPUT);
+
+void Game_handleInput(SDL_Event* event, bool* quit);
 void Game_Event(SDL_Event* event, bool* quit);
 void Game_Update(bool* quit);
 void Game_Draw(SDL_Renderer* renderer);

@@ -5,7 +5,7 @@ add_requires("libsdl_image")
 
 target("dinosaur_SDL2")
     set_kind("binary")
-    add_files("src/*.c")
+    add_files("src/background.c", "src/dino.c", "src/game.c", "src/main.c", "src/obstacle.c")
     add_packages("libsdl")
     add_packages("libsdl_image")
 --

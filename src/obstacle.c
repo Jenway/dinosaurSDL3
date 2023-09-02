@@ -1,58 +1,131 @@
 #include "../include/obstacle.h"
 #include "../include/SDL2/SDL_image.h"
 #include "../include/data.h"
+#include "SDL_log.h"
+#include <stdbool.h>
 
-
-Obstacle obstacle;
-
-bool Obstacle_Load(SDL_Renderer* renderer)
+Obstacle* Obstacle_Create(int index, int Speed)
 {
-    obstacle.texture = IMG_LoadTexture(renderer, OBSTACLE_IMAGE_PATH);
-    if (!obstacle.texture) {
-        SDL_Log("Failed to load obstacle texture");
+    Obstacle* obstacle = malloc(sizeof(Obstacle));
+    obstacle->index = index;
+    obstacle->speed = Speed;
+    Obstacle_Init(obstacle);
+    return obstacle;
+}
+
+
+bool Obstacle_Collision(Obstacle* self, SDL_Rect dino)
+{
+    SDL_Rect obstacle_rect = self->position;
+    return SDL_HasIntersection(&dino, &obstacle_rect);
+}
+
+void Obstacle_Init(struct obstacle* self)
+{
+    switch (self->index) {
+    case small_plant1:
+        self->position.x = PLANT_POSITION_X;
+        self->position.y = PLANT_POSITION_Y;
+        self->position.w = PLANT_POSITION_W;
+        self->position.h = PLANT_POSITION_H;
+        break;
+    case small_plant2:
+        self->position.x = PLANT_POSITION_X;
+        self->position.y = PLANT_POSITION_Y;
+        self->position.w = PLANT_POSITION_W;
+        self->position.h = PLANT_POSITION_W;
+        break;
+    case small_plant3:
+        self->position.x = PLANT_POSITION_X;
+        self->position.y = PLANT_POSITION_Y;
+        self->position.w = PLANT_POSITION_W;
+        self->position.h = PLANT_POSITION_H;
+        break;
+    case big_plant1:
+        self->position.x = PLANT_POSITION_X;
+        self->position.y = PLANT_POSITION_Y;
+        self->position.w = PLANT_POSITION_W;
+        self->position.h = PLANT_POSITION_H;
+        break;
+    case big_plant2:
+        self->position.x = PLANT_POSITION_X;
+        self->position.y = PLANT_POSITION_Y;
+        self->position.w = PLANT_POSITION_W;
+        self->position.h = PLANT_POSITION_H;
+        break;
+    case mix_plant:
+        self->position.x = PLANT_POSITION_X;
+        self->position.y = PLANT_POSITION_Y;
+        self->position.w = PLANT_POSITION_W;
+        self->position.h = PLANT_POSITION_H;
+        break;
+    case bird:
+        self->position.x = BIRD_POSITION_X;
+        self->position.y = BIRD_POSITION_Y;
+        self->position.w = BIRD_POSITION_W;
+        self->position.h = BIRD_POSITION_H;
+        break;
+    }
+}
+
+bool Obstacle_Load(struct obstacle* self, SDL_Renderer* renderer)
+{
+    switch (self->index) {
+    case small_plant1:
+        self->texture[0] = IMG_LoadTexture(renderer, SMALL_PLANT1_PNG);
+        break;
+    case small_plant2:
+        self->texture[0] = IMG_LoadTexture(renderer, SMALL_PLANT2_PNG);
+        break;
+    case small_plant3:
+        self->texture[0] = IMG_LoadTexture(renderer, SMALL_PLANT3_PNG);
+        break;
+    case big_plant1:
+        self->texture[0] = IMG_LoadTexture(renderer, BIG_PLANT1_PNG);
+        break;
+    case big_plant2:
+        self->texture[0] = IMG_LoadTexture(renderer, BIG_PLANT2_PNG);
+        break;
+    case mix_plant:
+        self->texture[0] = IMG_LoadTexture(renderer, MIX_PLANT_PNG);
+        break;
+    case bird:
+        self->texture[0] = IMG_LoadTexture(renderer, BIRD1_PNG);
+        self->texture[1] = IMG_LoadTexture(renderer, BIRD2_PNG);
+        break;
+    default:
+        break;
+    }
+    if (!self->texture[0]) {
+        SDL_Log("Failed to create obstacle texture: %s", SDL_GetError());
         return false;
     }
     return true;
 }
 
-void Obstacle_Init()
+void Obstacle_Draw(struct obstacle* self, SDL_Renderer* renderer)
 {
-    obstacle.position.x = OBSTACLE_POSITION_X;
-    obstacle.position.y = OBSTACLE_POSITION_Y;
-    obstacle.position.w = OBSTACLE_POSITION_W;
-    obstacle.position.h = OBSTACLE_POSITION_H;
-    obstacle.speed = OBSTACLE_SPEED;
-}
-
-void Obstacle_Update_position()
-{
-    obstacle.position.x -= obstacle.speed;
-    if (obstacle.position.x <= -obstacle.position.w) {
-        obstacle.position.x = WINDOW_WIDTH;
+    for (int i = 0; i < OBSTACLE_COUNT; i++) {
+        if (self->texture[1] != NULL) {
+            SDL_RenderCopy(renderer, self->texture[1], NULL, &self->position);
+        }
     }
 }
 
-void Obstacle_Draw(SDL_Renderer* renderer)
+void Obstacle_Update(struct obstacle* self)
 {
-    SDL_RenderCopy(renderer, obstacle.texture, NULL, &obstacle.position);
-}
-
-void Obstacle_Destroy() { SDL_DestroyTexture(obstacle.texture); }
-
-SDL_Rect Obstacle_Get_Collision() { return obstacle.position; }
-
-bool Obstacle_Collision(SDL_Rect dino_collision)
-{
-    if (SDL_HasIntersection(&dino_collision, &obstacle.position)) {
-        return true;
+    self->position.x -= self->speed;
+    if (self->position.x <= -OBSTACLE_WIDTH) {
+        self->position.x = 100;
     }
-    return false;
+    // SDL_Log("Obstacle position: %d", self->position.x);
 }
 
-void Obstacle_Reset()
+void Obstacle_Destroy(struct obstacle* self)
 {
-    obstacle.position.x = WINDOW_WIDTH;
-    obstacle.position.y = OBSTACLE_POSITION_Y;
-    obstacle.position.w = OBSTACLE_POSITION_W;
-    obstacle.position.h = OBSTACLE_POSITION_H;
+    SDL_DestroyTexture(self->texture[0]);
+    if (self->texture[1] != NULL) {
+        SDL_DestroyTexture(self->texture[1]);
+    }
+    // free(self);
 }

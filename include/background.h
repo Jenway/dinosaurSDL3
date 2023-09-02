@@ -1,3 +1,4 @@
+#include "SDL_render.h"
 #if !defined(__BACKGROUND_H__)
 #define __BACKGROUND_H__
 #include "SDL2/SDL_rect.h"
@@ -6,27 +7,28 @@
 
 typedef struct background {
 
-    SDL_Rect position;
-    int speed;
+    SDL_Rect ground_position;
+    SDL_Rect cloud_position;
+    SDL_Rect moon_position;
+    SDL_Rect star_position;
 
-    SDL_Texture* texture;
-    SDL_Rect offset;
-    SDL_Rect cutset, cutRect;
+    int ground_speed;
+    int cloud_speed;
+    int moon_speed;
+    int star_speed;
 
-    Uint32 FramePerSecond;
-    const Uint8* keyarr;
+    SDL_Texture* ground_texture;
+    SDL_Texture* cloud_texture;
+    SDL_Texture* moon_texture;
+    SDL_Texture* star_texture;
+
 } Background;
 
+Background* Background_Create(int index, int Speed);
 bool Background_Load(SDL_Renderer* renderer);
 void Background_Init();
 void Background_Update();
-void Background_Update_position();
 void Background_Draw(SDL_Renderer* renderer);
 void Background_Destroy();
 
-void Background_Quit();
-void Background_DrawRoad();
-void Background_DrawCloud();
-void Background_DrawPlant();
-void Background_DrawDino();
 #endif // __BACKGROUND_H__

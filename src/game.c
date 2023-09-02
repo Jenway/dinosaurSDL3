@@ -4,61 +4,17 @@
 #include "../include/dino.h"
 #include "../include/obstacle.h"
 #include "SDL_keycode.h"
-#include "SDL_scancode.h"
+
 #include <SDL_events.h>
 #include <SDL_log.h>
+#include <SDL_rect.h>
 #include <SDL_render.h>
 #include <SDL_timer.h>
 #include <stdbool.h>
 
 Game game;
-
-bool Game_Load(SDL_Renderer* renderer)
-{
-    // 加载背景
-    if (!Background_Load(renderer)) {
-        SDL_Log("Failed to load background");
-        return false;
-    }
-
-    // 加载恐龙
-    if (!Dino_Load(renderer)) {
-        SDL_Log("Failed to load dino");
-        return false;
-    }
-
-    // 加载障碍物
-    if (!Obstacle_Load(renderer)) {
-        SDL_Log("Failed to load obstacle");
-        return false;
-    }
-
-    // // 加载音效
-    // if (!Sound_Load()) {
-    //     SDL_Log("Failed to load sound");
-    //     return false;
-    // }
-
-    // // 加载字体
-    // if (!Font_Load(renderer)) {
-    //     SDL_Log("Failed to load font");
-    //     return false;
-    // }
-
-    // // 加载分数
-    // if (!Score_Load(renderer)) {
-    //     SDL_Log("Failed to load score");
-    //     return false;
-    // }
-
-    // // 加载游戏结束
-    // if (!Gameover_Load(renderer)) {
-    //     SDL_Log("Failed to load gameover");
-    //     return false;
-    // }
-
-    return true;
-}
+Dino* dino;
+Obstacle* obstacle[OBSTACLE_COUNT];
 
 void Game_loop(SDL_Renderer* renderer)
 {
@@ -69,8 +25,8 @@ void Game_loop(SDL_Renderer* renderer)
 
     while (!quit) {
         int Begin_Tick = SDL_GetTicks();
-        // 处理事件
-        Game_Event(&event, &quit);
+        // handleEvent
+        Game_handleEvent(&event, &quit);
         // 更新游戏状态
         Game_Update(&quit);
         // 绘制游戏画面
@@ -79,12 +35,39 @@ void Game_loop(SDL_Renderer* renderer)
         SDL_RenderPresent(renderer);
         int End_Tick = SDL_GetTicks(); // 获得事件结束Tick
         int Delay_time = 1000 / FPS - (End_Tick - Begin_Tick);
-        if (Delay_time < 0)
+        if (Delay_time < 0) {
             Delay_time = 0;
+        }
+
         SDL_Delay(Delay_time);
-        //  延时
-        // SDL_Delay(FRAMEPERSECOND);
     }
+}
+
+bool Game_Load(SDL_Renderer* renderer)
+{
+    // 加载背景
+    if (!Background_Load(renderer)) {
+        SDL_Log("Failed to load background");
+        return false;
+    }
+
+    // 加载恐龙
+    // malloc memory
+    dino = Dino_constructor();
+    if (!Dino_Load(dino, renderer)) {
+        SDL_Log("Failed to load dino");
+        return false;
+    }
+    for (int i = 0; i < OBSTACLE_COUNT; i++) {
+        obstacle[i] = Obstacle_Create(2, OBSTACLE_SPEED);
+        if (!obstacle[i]) {
+            SDL_Log("Failed to create obstacle");
+            return false;
+        }
+    }
+    SDL_Log("Game loaded");
+
+    return true;
 }
 
 void Game_Init()
@@ -94,20 +77,92 @@ void Game_Init()
     game.DOWN_pressed = false;
     game.SPACE_pressed = false;
     Background_Init();
-    Dino_Init();
-    Obstacle_Init();
-    // Score_Init();
-    // Gameover_Init();
+    Dino_Init(dino);
 }
 
 void Game_Reset()
 {
-    // 重置游戏状态
-    // Background_Reset();
-    // Dino_Reset();
-    // Obstacle_Reset();
-    // Score_Reset();
-    // Gameover_Reset();
+}
+
+void Game_handleEvent(SDL_Event* event, bool* quit)
+{
+    // Game_Event(event, quit);
+    if (SDL_PollEvent(event)) {
+        SDL_KeyCode INPUT = event->key.keysym.sym;
+        switch (event->type) {
+        case SDL_QUIT:
+            *quit = true;
+            SDL_Log("SDL_QUIT");
+            break;
+        case SDL_KEYDOWN:
+            Game_OnKeyDown(INPUT);
+            break;
+        case SDL_KEYUP:
+            Game_OnKeyUp(INPUT);
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void Game_OnKeyDown(SDL_KeyCode INPUT)
+{
+
+    if (!game.crashed && !game.paused) {
+
+        if (INPUT == SDLK_SPACE || INPUT == SDLK_w || INPUT == SDLK_UP) {
+            // Starting the game for the first time.
+            if (!game.playing) {
+                // loadSounds();
+                // setPlayStatus(true);
+                // update();
+            }
+            // Start jump.
+            if (!dino->jumping && !dino->ducking) {
+                // if (Runner.audioCues) {
+                //     this.generatedSoundFx.cancelFootSteps();
+                // } else {
+                //     this.playSound(this.soundFx.BUTTON_PRESS);
+                // }
+                int currentSpeed = DINO_JUMP_SPEED;
+                Dino_StartJump(dino,currentSpeed);
+            }
+            // Ducking
+        } else if (
+            INPUT == SDLK_DOWN || INPUT == SDLK_s) {
+            if (dino->jumping) {
+                // Speed drop, activated only when jump key is not pressed.
+                Dino_SetSpeedDrop(dino);
+            } else if (!dino->jumping && !dino->ducking) {
+                // Duck.
+                Dino_SetDuck(dino, true);
+            }
+        }
+    }
+}
+
+void Game_OnKeyUp(SDL_KeyCode INPUT)
+{
+    const SDL_KeyCode keyCode = INPUT;
+    const bool isjumpKey = INPUT == SDLK_SPACE || INPUT == SDLK_w || INPUT == SDLK_UP;
+
+    if (game.isRunning && isjumpKey) {
+        Dino_EndJump(dino);
+    } else if (INPUT == SDLK_DOWN || INPUT == SDLK_s) {
+        dino->speedDrop = false;
+        Dino_SetDuck(dino, false);
+    } else if (game.crashed) {
+        // Check that enough time has elapsed before allowing jump key to restart.
+        // const int deltaTime = getTimeStamp() - game.time;
+
+        //     if (this.isCanvasInView() && (Runner.keycodes.RESTART[keyCode] || this.isLeftClickOnCanvas(e) || (deltaTime >= this.config.GAMEOVER_CLEAR_TIME && Runner.keycodes.JUMP[keyCode]))) {
+        //         this.handleGameOverClicks(e);
+        //     }
+        // } else if (this.paused && isjumpKey) { // Reset the jump state
+        //     this.tRex.reset();
+        //     this.play();
+    }
 }
 
 void Game_Event(SDL_Event* event, bool* quit)
@@ -139,7 +194,7 @@ void Game_Event(SDL_Event* event, bool* quit)
 
             } else if (INPUT == SDLK_DOWN || INPUT == SDLK_s) {
                 game.DOWN_pressed = false;
-                Dino_DeCrawl();
+                Dino_DeCrawl(dino);
             }
             break;
         default:
@@ -147,12 +202,10 @@ void Game_Event(SDL_Event* event, bool* quit)
         }
     }
     if (game.SPACE_pressed) {
-        Dino_Jump();
-        SDL_Log("DINO JUMP");
+        Dino_Jump(dino);
     }
     if (game.DOWN_pressed) {
-        Dino_Crawl();
-        SDL_Log("DINO CRAWL");
+        Dino_Crawl(dino);
     }
 }
 
@@ -161,14 +214,15 @@ void Game_Update(bool* quit)
     // 更新游戏状态
     Background_Update();
     // SDL_Log("Background_Update");
-    Dino_Update();
-    // Obstacle_Update();
-    // Score_Update();
-    // Gameover_Update();
-
-    // 检测游戏结束
-    if (!Dino_Alive()) {
-        *quit = true;
+    Dino_Update(dino);
+    for (int i = 0; i < OBSTACLE_COUNT; i++) {
+        Obstacle_Update(obstacle[i]);
+    }
+    for (int i = 0; i < OBSTACLE_COUNT; i++) {
+        if (Obstacle_Collision(obstacle[i], dino->m_collider)) {
+            dino->Alive = false;
+            *quit = true;
+        }
     }
 }
 
@@ -178,26 +232,19 @@ void Game_Draw(SDL_Renderer* renderer)
     SDL_SetRenderDrawColor(renderer, 32, 33, 36, 255);
     SDL_RenderClear(renderer);
     Background_Draw(renderer);
-    Dino_Draw(renderer);
-    Obstacle_Draw(renderer);
-    // Score_Draw();
-    // Gameover_Draw();
+    Dino_Draw(dino, renderer);
+    // Obstacle_Draw(renderer);
+    for (int i = 0; i < OBSTACLE_COUNT; i++) {
+        Obstacle_Draw(obstacle[i], renderer);
+    }
 }
 
 void Game_Destroy()
 {
     // 释放游戏资源
-    // Background_Destroy();
-    // Dino_Destroy();
-    // Obstacle_Destroy();
-    // Sound_Destroy();
-    // Font_Destroy();
-    // Score_Destroy();
-    // Gameover_Destroy();
-}
-
-bool Game_Over(SDL_Renderer* renderer)
-{
-    // 检测游戏是否结束
-    return !Dino_Alive();
+    Background_Destroy();
+    Dino_destructor(dino);
+    for (int i = 0; i < OBSTACLE_COUNT; i++) {
+        Obstacle_Destroy(obstacle[i]);
+    }
 }
