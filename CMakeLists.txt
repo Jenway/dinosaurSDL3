@@ -1,20 +1,30 @@
 cmake_minimum_required(VERSION 3.16)
-project(${PROJECT_NAME} dinosaur_SDL2 VERSION 0.1.0 LANGUAGES C)
+project(${PROJECT_NAME} dinosaur_SDL3 VERSION 0.1.0 LANGUAGES C)
+
+# Create an option to switch between a system sdl library and a vendored SDL library
+option(MYGAME_VENDORED "Use vendored libraries" OFF)
 
 # set c standard
 set(CMAKE_C_STANDARD 11)
 
+# Create compile_commands.json for clangd
+set (CMAKE_EXPORT_COMPILECOMMANDS ON)
+
+if(MYGAME_VENDORED)
+    # This assumes you have added SDL as a submodule in vendored/SDL
+    add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
+else()
+    # 1. Look for a SDL3 package,
+    # 2. look for the SDL3-shared component, and
+    # 3. fail if the shared component cannot be found.
+    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
+    find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-shared)
+endif()
+
 aux_source_directory(src/. SRC_LIST)
-# add_executable(${PROJECT_NAME} ${SRC_LIST})
-add_executable(${PROJECT_NAME} src/background.c src/dino.c src/game.c src/main.c src/obstacle.c src/runner.c)
 
-# include SDL2
-# ! YOU NEED TO CHANGE THE PATH TO YOUR SDL2 FOLDER OR IT WON'T WORK !
-include_directories(${CMAKE_CURRENT_LIST_DIR}/include/SDL2)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/include/SDL2_image)
+add_executable(${PROJECT_NAME} src/main.c src/runner.c src/HorizonLine.c src/lTexture.c src/Horizon.c )
 
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/bin/SDL2.dll
-    ${CMAKE_CURRENT_LIST_DIR}/bin/SDL2_image.dll
-)
+# Link to the actual SDL3 library.
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_image::SDL3_image)
