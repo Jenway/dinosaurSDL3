@@ -1,7 +1,13 @@
 name: Build
 
 on:
+  workflow_dispatch:
+
   push:
+    branches:
+      - master
+
+  # push:
     # tags:
     #   - "v*.*.*"  # Push events to matching v*, i.e. v1.0.0, v20.15.10
 
