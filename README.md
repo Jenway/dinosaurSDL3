@@ -1,6 +1,6 @@
-# dinosaurSDL2
+# dinosaurSDL3
 
-小恐龙🦖 made with SDL2
+小恐龙🦖 made with SDL3
 
 ## 说明
 
@@ -16,10 +16,9 @@
 
 ## 依赖
 
-- SDL2
+- SDL3
 - SDL2_image
-- SDL2_ttf
-- CMake or xmake
+- CMake
 
 ## 编译
 

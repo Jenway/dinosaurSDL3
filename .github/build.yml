@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  push:
+    # tags:
+    #   - "v*.*.*"  # Push events to matching v*, i.e. v1.0.0, v20.15.10
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+  # Customize the target name here
+  targetName: "DinosaurSDL3"
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure Git
+      run: |
+        git --version
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory.
+      # `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -B '${{ github.workspace }}/build'
+    
+    - name: Install SDL3
+      run: |
+        git clone git@github.com:libsdl-org/SDL.git
+        cd SDL
+        cmake -S . -B build
+        cmake --build build --config ${{ env.BUILD_TYPE }} && cmake --install build
+
+    - name: Install SDL3_image
+      run: |
+        git clone git@github.com:libsdl-org/SDL_image.git
+        cd SDL_image
+        cmake -S . -B build
+        cmake --build build --config ${{ env.BUILD_TYPE }} && cmake --install build
+    
+    - name: Build
+      # Build your program with the given configuration
+      run: cmake --build '${{github.workspace}}/build' -v --config ${{ env.BUILD_TYPE }}
+    
+
+    # - name: Package
+    #   run: 
+
+    # - name: Release
+    #   uses: softprops/action-gh-release@v1
+    #   if: startsWith(github.ref, 'refs/tags/')
+    #   with:
+    #     files: |
+    #       LICENSE
+    #     tag_name: ${{github.ref}}
+    #     body: |
+    #       ${{github.ref}}
+    #     draft: false
+    #     prerelease: false
+    #     token: ${{secrets.RELEASE_TOKEN}}
