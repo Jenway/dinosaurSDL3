@@ -21,9 +21,12 @@ else()
     find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-shared)
 endif()
 
+# add include directories
+include_directories(include)
+
 aux_source_directory(src/. SRC_LIST)
 
-add_executable(${PROJECT_NAME} src/main.c src/runner.c src/HorizonLine.c src/lTexture.c src/Horizon.c )
+add_executable(${PROJECT_NAME} ${SRC_LIST} )
 
 # Link to the actual SDL3 library.
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
