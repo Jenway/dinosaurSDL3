@@ -15,12 +15,14 @@ LTexture* LTexture_constructor()
     // methods
     this->loadFromFile = LTexture_loadFromFile;
     this->render = LTexture_render;
+    this->free = LTexture_destructor;
     return this;
 }
 void LTexture_destructor(LTexture* this)
 {
     LTexture_free(this);
     free(this);
+    this = NULL;
 }
 
 bool LTexture_loadFromFile(LTexture* this, SDL_Renderer* gRenderer, char* path)

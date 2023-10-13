@@ -15,6 +15,7 @@ typedef struct ltexture {
     // methods
     bool (*loadFromFile)(struct ltexture* this, SDL_Renderer* gRenderer, char* path);
     void (*render)(struct ltexture* this, SDL_Renderer* gRenderer, const SDL_FRect* scrRect, const SDL_FRect* destRect);
+    void (*free)(struct ltexture* this);
 } LTexture;
 
 LTexture* LTexture_constructor();

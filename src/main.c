@@ -7,7 +7,6 @@
 #include <SDL3_image/SDL_image.h>
 #include <stdbool.h>
 
-
 // Screen dimension constants
 // const int SCREEN_WIDTH = 1200;
 // const int SCREEN_HEIGHT = 300;
@@ -33,10 +32,12 @@ int main(int argc, char* argv[])
             SDL_Log("Failed to initialize Runner!\n");
         } else {
             // load resources
-            Runner_loadImages(this, gRenderer);
-            Runner_init(this, gWindow, gRenderer);
+            this->loadImages(this, gRenderer);
+            this->loadAudio(this);
+            this->init(this, gWindow, gRenderer);
+            this->loop(this, gWindow, gRenderer);
             // free resources
-            Runner_destructor(this);
+            this->destructor(this);
         }
     }
     // Free resources and close SDL

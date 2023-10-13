@@ -21,14 +21,11 @@ typedef int DistanceMeter;
 typedef struct runner {
 
     LTexture* imageSprite; // 精灵图
-    int* spritePos[4]; // 精灵图中各个精灵的位置
 
     Horizon* horizon;
     TRex* tRex;
     HorizonLine* horizonLine;
     DistanceMeter* distanceMeter;
-
-    SDL_Rect spriteDef;
 
     int time; // 时钟计时器
     int currentSpeed; // 当前的速度
@@ -38,7 +35,18 @@ typedef struct runner {
     bool crashed; // 小恐龙是否碰到了障碍物
     bool paused; // 游戏是否暂停
 
+    void (*init)(struct runner* this, SDL_Window* gWindow, SDL_Renderer* gRender);
     void (*loop)(struct runner* this, SDL_Window* gWindow, SDL_Renderer* renderer);
+    void (*handleEvent)(struct runner* this, SDL_Event* event, bool* playing);
+    void (*paintEvent)(struct runner* this, SDL_Renderer* renderer);
+    void (*render)(struct runner* this, SDL_Renderer* renderer);
+    void (*update)(struct runner* this, SDL_Renderer* renderer);
+
+    void (*loadImages)(struct runner* this, SDL_Renderer* renderer);
+    void (*loadAudio)(struct runner* this);
+    void (*setSpeed)(struct runner* this, int opt_speed);
+
+    void (*destructor)(struct runner* this);
 
 } Runner;
 

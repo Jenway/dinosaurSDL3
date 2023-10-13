@@ -1,5 +1,6 @@
-#include "Data.h"
-#include <Runner.h>
+#include "../include/Runner.h"
+#include "../include/Data.h"
+#include <SDL_log.h>
 #include <SDL_rect.h>
 #include <SDL_video.h>
 #include <stdio.h>
@@ -13,6 +14,10 @@ Runner* Runner_constructor()
     this->distanceMeter = 0;
     this->tRex = 0;
     this->loop = Runner_loop;
+    this->loadImages = Runner_loadImages;
+    this->loadAudio = Runner_loadAudio;
+    this->init = Runner_init;
+    this->destructor = Runner_destructor;
     return this;
 }
 
@@ -22,9 +27,8 @@ void Runner_loadImages(Runner* this, SDL_Renderer* renderer)
     LTexture_loadFromFile(this->imageSprite, renderer, SPRITE_PATH);
 }
 
-void Runner_freeImages(Runner* this)
+void Runner_loadAudio(Runner* this)
 {
-    LTexture_destructor(this->imageSprite);
 }
 
 void Runner_setSpeed(Runner* this, int opt_speed)
@@ -45,10 +49,11 @@ void Runner_init(Runner* this, SDL_Window* gWindow, SDL_Renderer* gRender)
     this->horizon = 0;
     this->distanceMeter = 0;
     this->tRex = 0;
+
     // 8. 将画布添加到容器中
     // 9. 开始监听各种事件,如键盘输入、resize等
     // 10. 设置一个update循环来更新游戏状态和渲染
-    this->loop(this, gWindow, gRender);
+    // this->loop(this, gWindow, gRender);
     // 11. 检查深色模式,进行对应的样式调整
     // 12. 初始化高分
     // 13. 播报辅助功能描述语音
@@ -69,6 +74,6 @@ void Runner_loop(Runner* this, SDL_Window* gWindow, SDL_Renderer* gRenderer)
 
 void Runner_destructor(Runner* this)
 {
-    Runner_freeImages(this);
+    LTexture_destructor(this->imageSprite);
     free(this);
 }
