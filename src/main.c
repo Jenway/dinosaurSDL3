@@ -5,6 +5,7 @@
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3_image/SDL_image.h>
 #include <stdbool.h>
@@ -13,20 +14,26 @@
 bool init_SDL();
 void close_SDL();
 
+// callback function
+Uint32 callback(Uint32 interval, void* param);
+
 // The window we'll be rendering to
 SDL_Window* gWindow = NULL;
 // The window renderer
 SDL_Renderer* gRenderer = NULL;
+
+Runner* this = NULL;
 
 int main(int argc, char* argv[])
 {
     if (!init_SDL()) {
         SDL_Log("Failed to initialize SDL!\n");
     } else {
-        Runner* this = Runner_constructor(gWindow, gRenderer);
+        this = Runner_constructor(gWindow, gRenderer);
         if (this == NULL) {
             SDL_Log("Failed to initialize Runner!\n");
         } else {
+
             // load resources
             this->loadImages(this);
             this->loadAudio(this);
@@ -39,6 +46,19 @@ int main(int argc, char* argv[])
     // Free resources and close SDL
     close_SDL();
     return 0;
+}
+
+Uint32 callback(Uint32 interval, void* param) // 回调函数
+{
+    // SDL_Log("done %d\n", interval);
+    Runner* this = param;
+    this->paintEvent(this);
+    /*
+     * WARNING: The rendering in SDL only happens in the main thread.
+     * SDL/OpenGL requires all rendering calls to come exactly from 1 thread.
+     * The thread that created the SDL_Renderer
+     */
+    return interval;
 }
 
 bool init_SDL()

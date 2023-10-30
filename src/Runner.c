@@ -1,6 +1,7 @@
 #include "../include/Runner.h"
 #include "../include/Data.h"
 #include <RectProvider.h>
+#include <SDL3/SDL_timer.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <SDL_log.h>
@@ -25,6 +26,8 @@ Runner* Runner_constructor(SDL_Window* gWindow, SDL_Renderer* gRenderer)
 
     this->loop = Runner_loop;
     this->paintEvent = Runner_paintEvent;
+    this->update = Runner_update;
+
     this->loadImages = Runner_loadImages;
     this->loadAudio = Runner_loadAudio;
     this->init = Runner_init;
@@ -73,8 +76,13 @@ void Runner_loop(Runner* this)
 {
     bool quit = false;
     SDL_Event e;
+    SDL_AddTimer(100, callback_for_tRex, this->tRex);
     while (!quit) {
+
+        // get ticks
+        Uint32 ticks = SDL_GetTicks();
         this->paintEvent(this);
+        // SDL_Log("loop\n");
         // Handle events on queue
         while (SDL_PollEvent(&e) != 0) {
             // User requests quit
@@ -92,27 +100,48 @@ void Runner_loop(Runner* this)
                 }
                 if (e.key.keysym.sym == SDLK_SPACE) {
                     SDL_Log("Window %d resized to %dx%d\n", e.window.windowID, e.window.data1, e.window.data2);
+                    this->tRex->state = RUNNING;
                 }
             }
+        }
+        this->update(this);
+
+        // get ticks
+        Uint32 ticks2 = SDL_GetTicks();
+        Uint32 interval = ticks2 - ticks;
+        if (interval < 1000 / 60) {
+            SDL_Delay(1000 / 60 - interval);
         }
     }
 }
 
 void Runner_paintEvent(Runner* this)
 {
+    // SDL_Log("paintEvent\n");
     // Clear screen
     SDL_RenderClear(this->gRenderer);
     // draw bak color f7f7f7
+
     SDL_SetRenderDrawColor(this->gRenderer, 0xf7, 0xf7, 0xf7, 0x7f);
     SDL_RenderFillRect(this->gRenderer, NULL);
-    SDL_RendererFlip flip = SDL_FLIP_NONE;
 
-    this->imageSprite->render(this->imageSprite, this->gRenderer, this->tRex->srcRect, this->tRex->destRect);
+    // SDL_RendererFlip flip = SDL_FLIP_NONE;
+
+    // SDL_Log("this->tRex->srcRect %f %f %f %f\n", this->tRex->srcRect->x, this->tRex->srcRect->y, this->tRex->srcRect->w, this->tRex->srcRect->h);
+    // SDL_Log("this->tRex->destRect %f %f %f %f\n", this->tRex->destRect->x, this->tRex->destRect->y, this->tRex->destRect->w, this->tRex->destRect->h);
+    // SDL_Log("address %p\n", this->imageSprite);
+
+    this->imageSprite->render(this->imageSprite, this->gRenderer, this->tRex->getSrcRect(this->tRex), this->tRex->destRect);
 
     // this->imageSprite->render(this->imageSprite, this->gRenderer, NULL, dest_rect);
 
     // Update screen
     SDL_RenderPresent(this->gRenderer);
+}
+
+void Runner_update(Runner* this)
+{
+    this->tRex->update(this->tRex);
 }
 
 void Runner_destructor(Runner* this)

@@ -10,7 +10,7 @@
  *  1 - tRex 2 - cactus 3 - bird 4 - ground 5 - cloud
  */
 typedef struct rectProvider {
-    SDL_FRect* (*getSrc)(int choice);
+    SDL_FRect* (*getSrc)(int choice, int frame);
     SDL_FRect* (*getDest)(int choice);
 } RectProvider;
 
@@ -24,7 +24,7 @@ enum {
 
 RectProvider RectProvider_constructor();
 
-SDL_FRect* RectProvider_getSrcRect(int choice);
+SDL_FRect* RectProvider_getSrcRect(int choice, int frame);
 
 SDL_FRect RectProvider_MultiplyRect(SDL_FRect* rect, float factor);
 

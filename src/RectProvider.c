@@ -9,12 +9,43 @@ RectProvider RectProvider_constructor()
     };
 }
 
-SDL_FRect* RectProvider_getSrcRect(int choice)
+SDL_FRect* RectProvider_getSrcRect(int choice, int state)
 {
     SDL_FRect* src_rect = malloc(sizeof(SDL_FRect));
     switch (choice) {
     case TREX_RECT:
-        *src_rect = (SDL_FRect)SPRITE_TREX_RUNNING_1;
+        switch (state) {
+        case 0:
+            *src_rect = (SDL_FRect)SPRITE_TREX_WATING_STEAY;
+            break;
+        case 1:
+            *src_rect = (SDL_FRect)SPRITE_TREX_WATING_1;
+            break;
+        case 2:
+            *src_rect = (SDL_FRect)SPRITE_TREX_WATING_2;
+            break;
+        case 3:
+            *src_rect = (SDL_FRect)SPRITE_TREX_RUNNING_1;
+            break;
+        case 4:
+            *src_rect = (SDL_FRect)SPRITE_TREX_RUNNING_2;
+            break;
+        case 5:
+            *src_rect = (SDL_FRect)SPRITE_TREX_CRASHED_1;
+            break;
+        case 6:
+            *src_rect = (SDL_FRect)SPRITE_TREX_CRASHED_2;
+            break;
+        case 7:
+            *src_rect = (SDL_FRect)SPRITE_TREX_DUCKING_1;
+            break;
+        case 8:
+            *src_rect = (SDL_FRect)SPRITE_TREX_DUCKING_2;
+            break;
+        default:
+            break;
+        }
+
         break;
     case CACTUS_RECT:
         src_rect->x = 446;
@@ -69,40 +100,14 @@ SDL_FRect* RectProvider_getDestRect(int choice)
     SDL_FRect* dest_rect = malloc(sizeof(SDL_FRect));
     switch (choice) {
     case TREX_RECT:
-        dest_rect->x = 88 * 2;
-        dest_rect->y = 6 * 2;
-        dest_rect->w = 88 * 2;
-        dest_rect->h = 90 * 2;
-        break;
-    case CACTUS_RECT:
-        dest_rect->x = 446;
-        dest_rect->y = 2;
-        dest_rect->w = 17;
-        dest_rect->h = 35;
-        break;
-    case BIRD_RECT:
-        dest_rect->x = 260;
-        dest_rect->y = 0;
-        dest_rect->w = 46;
-        dest_rect->h = 40;
-        break;
-    case GROUND_RECT:
-        dest_rect->x = 2;
-        dest_rect->y = 54;
-        dest_rect->w = 2400;
-        dest_rect->h = 26;
-        break;
-    case CLOUD_RECT:
-        dest_rect->x = 86;
-        dest_rect->y = 2;
-        dest_rect->w = 46;
-        dest_rect->h = 14;
+        *dest_rect = (SDL_FRect) {
+            .x = 50 * 2,
+            .y = 50 * 2,
+            .w = 88 * 2,
+            .h = 94 * 2,
+        };
         break;
     default:
-        dest_rect->x = 0;
-        dest_rect->y = 0;
-        dest_rect->w = 0;
-        dest_rect->h = 0;
         break;
     }
     return dest_rect;
