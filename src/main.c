@@ -1,17 +1,13 @@
 #include <Data.h>
 #include <Runner.h>
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
 #include <SDL3_image/SDL_image.h>
 #include <stdbool.h>
-
-// Screen dimension constants
-// const int SCREEN_WIDTH = 1200;
-// const int SCREEN_HEIGHT = 300;
-
-#define SCREEN_TITLE "Chrome Dino"
 
 // Starts up SDL and creates window
 bool init_SDL();
@@ -27,18 +23,18 @@ int main(int argc, char* argv[])
     if (!init_SDL()) {
         SDL_Log("Failed to initialize SDL!\n");
     } else {
-        Runner* this = Runner_constructor();
+        Runner* this = Runner_constructor(gWindow, gRenderer);
         if (this == NULL) {
             SDL_Log("Failed to initialize Runner!\n");
         } else {
             // load resources
-            this->loadImages(this, gRenderer);
+            this->loadImages(this);
             this->loadAudio(this);
-            this->init(this, gWindow, gRenderer);
-            this->loop(this, gWindow, gRenderer);
-            // free resources
-            this->destructor(this);
+            this->init(this);
+            this->loop(this);
         }
+        // free resources
+        this->destructor(this);
     }
     // Free resources and close SDL
     close_SDL();
@@ -53,6 +49,8 @@ bool init_SDL()
     int SDL_Init_Flag = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS;
     // Initialize SDL
     if (SDL_Init(SDL_Init_Flag) != 0) {
+        // Q: Why not use SDL_InitSubSystem()?
+        // A: SDL_InitSubSystem() and SDL_Init() are interchangeable in SDL.
         SDL_Log("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
         success = false;
     } else {
@@ -60,9 +58,8 @@ bool init_SDL()
         if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
             SDL_Log("Warning: Linear texture filtering not enabled!");
         }
-
         // Create window
-        gWindow = SDL_CreateWindow(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_EVENT_WINDOW_RESIZED);
+        gWindow = SDL_CreateWindow(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
         if (gWindow == NULL) {
             SDL_Log("Window could not be created! SDL Error: %s\n", SDL_GetError());
             success = false;
@@ -76,8 +73,7 @@ bool init_SDL()
             } else {
                 // Initialize renderer color
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-                // Initialize PNG && JPG loading
+                // Initialize PNG && JPG loading from SDL_image
                 int imgFlags = IMG_INIT_PNG;
                 if (!(IMG_Init(imgFlags) & imgFlags)) {
                     SDL_Log("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
@@ -86,6 +82,7 @@ bool init_SDL()
             }
         }
     }
+
     return success;
 }
 

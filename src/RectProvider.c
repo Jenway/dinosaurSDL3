@@ -1,4 +1,5 @@
 #include "../include/RectProvider.h"
+#include <Data.h>
 
 RectProvider RectProvider_constructor()
 {
@@ -8,15 +9,12 @@ RectProvider RectProvider_constructor()
     };
 }
 
-SDL_Rect* RectProvider_getSrcRect(int choice)
+SDL_FRect* RectProvider_getSrcRect(int choice)
 {
-    SDL_Rect* src_rect = malloc(sizeof(SDL_Rect));
+    SDL_FRect* src_rect = malloc(sizeof(SDL_FRect));
     switch (choice) {
     case TREX_RECT:
-        src_rect->x = 0;
-        src_rect->y = 0;
-        src_rect->w = 44;
-        src_rect->h = 47;
+        *src_rect = (SDL_FRect)SPRITE_TREX_RUNNING_1;
         break;
     case CACTUS_RECT:
         src_rect->x = 446;
@@ -42,6 +40,11 @@ SDL_Rect* RectProvider_getSrcRect(int choice)
         src_rect->w = 46;
         src_rect->h = 14;
         break;
+    // case BUTTON_RECT:
+    //     src_rect->x = 2;
+    //     src_rect->y = 2;
+    //     src_rect->w = 72;
+    //     src_rect->h = 64;
     default:
         src_rect->x = 0;
         src_rect->y = 0;
@@ -51,16 +54,25 @@ SDL_Rect* RectProvider_getSrcRect(int choice)
     }
     return src_rect;
 }
-
-SDL_Rect* RectProvider_getDestRect(int choice)
+SDL_FRect RectProvider_MultiplyRect(SDL_FRect* rect, float factor)
 {
-    SDL_Rect* dest_rect = malloc(sizeof(SDL_Rect));
+    return (SDL_FRect) {
+        .x = rect->x * factor,
+        .y = rect->y * factor,
+        .w = rect->w * factor,
+        .h = rect->h * factor,
+    };
+}
+
+SDL_FRect* RectProvider_getDestRect(int choice)
+{
+    SDL_FRect* dest_rect = malloc(sizeof(SDL_FRect));
     switch (choice) {
     case TREX_RECT:
-        dest_rect->x = 0;
-        dest_rect->y = 0;
-        dest_rect->w = 44;
-        dest_rect->h = 47;
+        dest_rect->x = 88 * 2;
+        dest_rect->y = 6 * 2;
+        dest_rect->w = 88 * 2;
+        dest_rect->h = 90 * 2;
         break;
     case CACTUS_RECT:
         dest_rect->x = 446;

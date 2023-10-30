@@ -31,12 +31,15 @@ bool LTexture_loadFromFile(LTexture* this, SDL_Renderer* gRenderer, char* path)
     SDL_Texture* newTexture = NULL;
 
     newTexture = IMG_LoadTexture(gRenderer, path);
+    SDL_QueryTexture(newTexture, NULL, NULL, &this->mWidth, &this->mHeight);
 
     SDL_Surface* loadedSurface = IMG_Load(path);
     if (loadedSurface == NULL) {
         printf("Unable to load image %s! SDL_image Error: %s\n", path, IMG_GetError());
     } else {
-        SDL_SetSurfaceColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+        // SDL_SetSurfaceColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+        // ffffff
+        SDL_SetSurfaceColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0xFF, 0xFF, 0xFF));
         newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
 
         SDL_DestroySurface(loadedSurface);
