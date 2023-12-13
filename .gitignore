@@ -1,10 +1,6 @@
-/.cache/
-/.vscode/
-/.xmake/
-/build/
-/lib/
-/include/SDL2/
-/bin/
-/share/
-/assets/
-/test
+.cache/
+.vscode/
+.xmake/
+build/
+assets/
+test/

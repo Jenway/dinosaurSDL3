@@ -1,24 +1,24 @@
 #if !defined(__TREX_H__)
 #define __TREX_H__
 
-#include <Data.h>
+#include "Data.h"
 #include <SDL3/SDL.h>
 
-typedef struct tRex {
-    SDL_FRect* srcRects[9];
-    SDL_FRect* destRect;
-
-    // frame
+typedef struct tRex { // frame
     enum { STEADY,
         WAITING,
         RUNNING,
         JUMPING,
+        FALLING,
         DUCKING,
-        CRASHED
+        CRASHED,
+        NUM_STATES
     } state;
+    SDL_FRect* srcRects[NUM_STATES];
+    SDL_FRect* destRect;
 
     int subFrame;
-
+    int currentSpeed;
     void (*destructor)(struct tRex* this);
     void (*update)(struct tRex* this);
     SDL_FRect* (*getSrcRect)(struct tRex* this);

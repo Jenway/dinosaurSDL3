@@ -3,8 +3,8 @@
 
 #define SCREEN_TITLE "Chrome Dino"
 
-#define SCREEN_WIDTH 1200
-#define SCREEN_HEIGHT 300
+#define SCREEN_WIDTH 1200 * 2
+#define SCREEN_HEIGHT 300 * 4
 // the width : height ratio of the screen should be 4 : 1
 
 #define FPS 60

@@ -3,6 +3,7 @@
 
 #include "tRex.h"
 #include <Data.h>
+#include <Horizon.h>
 #include <SDL_events.h>
 #include <SDL_render.h>
 #include <SDL_timer.h>
@@ -14,9 +15,7 @@
 /**
  * 游戏主体类，控制游戏的整体逻辑
  */
-typedef int Horizon;
-typedef int HorizonLine;
-typedef int Cloud;
+
 typedef int DistanceMeter;
 
 typedef struct runner {
@@ -27,7 +26,6 @@ typedef struct runner {
 
     Horizon* horizon;
     TRex* tRex;
-    HorizonLine* horizonLine;
     DistanceMeter* distanceMeter;
 
     int time; // 时钟计时器

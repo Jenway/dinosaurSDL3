@@ -1,4 +1,5 @@
 #include <RectProvider.h>
+#include <SDL_log.h>
 #include <SDL_rect.h>
 #include <SDL_stdinc.h>
 #include <locale.h>
@@ -10,6 +11,7 @@ TRex* TRex_constructor()
     TRex* this = malloc(sizeof(TRex));
     this->state = 0;
     this->subFrame = 0;
+    this->currentSpeed = 10;
     for (int i = 0; i < 9; i++) {
         this->srcRects[i] = RectProvider_getSrcRect(TREX_RECT, i);
     }
@@ -40,6 +42,29 @@ Uint32 callback_for_tRex(Uint32 interval, void* param)
 
 void TRex_update(TRex* this)
 {
+    SDL_Log("TRex_update \n");
+    SDL_Log("TRexstate: %d \n", this->state);
+    switch (this->state) {
+    case STEADY:
+        break;
+    case WAITING:
+        break;
+    case RUNNING:
+        break;
+    case JUMPING:
+        // TODO update destRect
+        // TODO update collision box
+        this->destRect->y += this->currentSpeed;
+        SDL_Log("tRex y: %f", this->destRect->y);
+        break;
+    case CRASHED:
+        break;
+    case DUCKING:
+        // TODO update collision box
+        break;
+    default:
+        break;
+    }
 }
 
 SDL_FRect* TRex_getSrcRect(TRex* this)
@@ -53,9 +78,13 @@ SDL_FRect* TRex_getSrcRect(TRex* this)
         return this->srcRects[3 + this->subFrame];
     case JUMPING:
         return this->srcRects[3];
+    case FALLING:
+        return this->srcRects[4];
     case CRASHED:
-        return this->srcRects[5 + this->subFrame];
+        return this->srcRects[6 + this->subFrame];
     case DUCKING:
-        return this->srcRects[7 + this->subFrame];
+        return this->srcRects[8 + this->subFrame];
+    default:
+        return NULL;
     }
 }

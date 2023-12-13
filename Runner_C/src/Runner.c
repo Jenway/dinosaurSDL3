@@ -1,5 +1,4 @@
 #include "../include/Runner.h"
-#include "../include/Data.h"
 #include <RectProvider.h>
 #include <SDL3/SDL_timer.h>
 #include <SDL_events.h>
@@ -9,7 +8,6 @@
 #include <SDL_render.h>
 #include <SDL_video.h>
 #include <stdio.h>
-#include <tRex.h>
 
 Runner* Runner_constructor(SDL_Window* gWindow, SDL_Renderer* gRenderer)
 {
@@ -20,7 +18,7 @@ Runner* Runner_constructor(SDL_Window* gWindow, SDL_Renderer* gRenderer)
     this->imageSprite = NULL;
 
     this->currentSpeed = 0;
-    this->horizon = 0;
+    this->horizon = Horizon_constructor();
     this->distanceMeter = 0;
     this->tRex = TRex_constructor();
 
@@ -60,9 +58,6 @@ void Runner_init(Runner* this)
     // 5. 生成音频Context和声音效果对象
     // 6. 获得画布context,填充画布的背景
     // 7. 创建游戏场景中的各个对象,如地平线、距离表、恐龙等
-    this->horizon = 0;
-    this->distanceMeter = 0;
-
     // 8. 将画布添加到容器中
     // 9. 开始监听各种事件,如键盘输入、resize等
     // 10. 设置一个update循环来更新游戏状态和渲染
@@ -77,12 +72,14 @@ void Runner_loop(Runner* this)
     bool quit = false;
     SDL_Event e;
     SDL_AddTimer(100, callback_for_tRex, this->tRex);
+
     while (!quit) {
+        this->tRex->state = RUNNING;
 
         // get ticks
         Uint32 ticks = SDL_GetTicks();
         this->paintEvent(this);
-        // SDL_Log("loop\n");
+        SDL_Log("loop\n");
         // Handle events on queue
         while (SDL_PollEvent(&e) != 0) {
             // User requests quit
@@ -95,16 +92,39 @@ void Runner_loop(Runner* this)
             }
             if (e.type == SDL_EVENT_KEY_DOWN) {
                 const SDL_Keycode keyName = e.key.keysym.sym;
+                if (!this->crashed && !this->paused) {
+                    if (e.key.keysym.sym == SDLK_SPACE) {
+                        if (!this->playing) {
+                            // this->loadAudio();
+                            this->SetPlayStatus(true);
+                            this->update();
+                        }
+                        // Start Jump
+                        if (this->tRex->state != JUMPING || this->tRex->state != DUCKING) {
+                            this->tRex->startJump(this->tRex, this->currentSpeed);
+                        }
+                        // speed drop
+                    }
+                }
+            }
+            if (e.type == SDL_EVENT_KEY_UP) {
+                const SDL_Keycode keyName = e.key.keysym.sym;
                 if (keyName == SDLK_ESCAPE || keyName == SDLK_q) {
                     quit = true;
                 }
-                if (e.key.keysym.sym == SDLK_SPACE) {
-                    SDL_Log("Window %d resized to %dx%d\n", e.window.windowID, e.window.data1, e.window.data2);
-                    this->tRex->state = RUNNING;
+                bool isJumpKey = keyName == SDLK_SPACE || keyName == SDLK_UP || keyName == SDLK_w;
+                bool isDuckKey = keyName == SDLK_DOWN || keyName == SDLK_s;
+                if (this->playing && isJumpKey) {
+                    this->tRex->endJump(this->tRex);
+                } else if (isDuckKey && this->tRex->state == DUCKING) {
+                    this->tRex->speedDrop = false;
+                    this->tRex->setDuck(this->tRex, false);
+                } else if (this->crashed){
+                    
                 }
             }
+            this->update(this);
         }
-        this->update(this);
 
         // get ticks
         Uint32 ticks2 = SDL_GetTicks();
@@ -125,14 +145,8 @@ void Runner_paintEvent(Runner* this)
     SDL_SetRenderDrawColor(this->gRenderer, 0xf7, 0xf7, 0xf7, 0x7f);
     SDL_RenderFillRect(this->gRenderer, NULL);
 
-    // SDL_RendererFlip flip = SDL_FLIP_NONE;
-
-    // SDL_Log("this->tRex->srcRect %f %f %f %f\n", this->tRex->srcRect->x, this->tRex->srcRect->y, this->tRex->srcRect->w, this->tRex->srcRect->h);
-    // SDL_Log("this->tRex->destRect %f %f %f %f\n", this->tRex->destRect->x, this->tRex->destRect->y, this->tRex->destRect->w, this->tRex->destRect->h);
-    // SDL_Log("address %p\n", this->imageSprite);
-
     this->imageSprite->render(this->imageSprite, this->gRenderer, this->tRex->getSrcRect(this->tRex), this->tRex->destRect);
-
+    this->horizon->draw(this->horizon, this->gRenderer, this->imageSprite);
     // this->imageSprite->render(this->imageSprite, this->gRenderer, NULL, dest_rect);
 
     // Update screen
@@ -150,4 +164,5 @@ void Runner_destructor(Runner* this)
     TRex_destructor(this->tRex);
 
     free(this);
+    this = NULL;
 }
