@@ -1,3 +1,5 @@
+#if !defined(__ITEXTURE_HPP__)
+#define __ITEXTURE_HPP__
 // ITexture : Wrapper for original SDL_Texture
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_Rect.h>
@@ -77,3 +79,5 @@ private:
     int mWidth;
     int mHeight;
 };
+
+#endif // __ITEXTURE_HPP__
