@@ -2,7 +2,7 @@
 #include <iostream>
 #include <tRex.hpp>
 
-void TRex::update(double deltaTime)
+void TRex::update(float deltaTime)
 {
     this->mTimer += 1;
 
@@ -26,56 +26,12 @@ void TRex::update(double deltaTime)
     }
 }
 
-void TRex::startJump(double speed)
+void TRex::startJump(float speed)
 {
-    if (!this->jumping) {
+    if (mStatus != Status::kJumping) {
         this->mStatus = Status::kJumping;
-        // Tweak the jump velocity based on the speed.
-        this->jumpVelocity = INITIAL_JUMP_VELOCITY - (speed / 10);
-        // std::clog << "jumpVelocity: " << this->jumpVelocity << std::endl;
-        this->jumping = true;
-        this->reachedMinHeight = false;
+        this->jumpVelocity = -INITIAL_JUMP_VELOCITY;
         this->speedDrop = false;
-    }
-}
-
-void TRex::updateJump(double deltaTime)
-{
-    const double msPerFrame = 1000.0 / 60; // TODO msPerFrame[5]
-    deltaTime = deltaTime / 1000;
-    const double framesElapsed = deltaTime / msPerFrame;
-
-    // Speed drop makes Trex fall faster.
-    if (this->speedDrop) {
-        this->yPos += round(this->jumpVelocity * this->SPEED_DROP_COEFFICIENT * framesElapsed);
-    } else {
-        // std::clog << "msPerFrame: " << msPerFrame << std::endl;
-        // std::clog << "framesElapsed: " << framesElapsed << std::endl;
-        // std::clog << "jumpVelocity: " << this->jumpVelocity << std::endl;
-        this->yPos += round(this->jumpVelocity * framesElapsed);
-        // this->yPos += this->jumpVelocity;
-        this->destRect.y = this->yPos;
-    }
-
-    this->jumpVelocity += this->GRAVITY * framesElapsed;
-
-    // Minimum height has been reached.
-    if ((this->yPos < this->minJumpHeight) || this->speedDrop) {
-        this->reachedMinHeight = true;
-    }
-
-    // Reached max height.
-    if (this->yPos < this->MAX_JUMP_HEIGHT || this->speedDrop) {
-        this->endJump();
-    }
-
-    // Back down at ground level. Jump completed.
-    if (this->yPos > this->groundYPos) {
-        this->reset();
-        this->jumpCount++;
-
-        //*if (/* * play music*/) {
-        // Runner.playSound(Runner.soundFx.HIT);
     }
 }
 
@@ -86,35 +42,58 @@ void TRex::endJump()
     }
 }
 
-void TRex::setSpeedDrop()
+void TRex::updateJump(float deltaTime)
 {
-    this->speedDrop = true;
-    this->jumpVelocity = 1;
+    const float framesElapsed = deltaTime / 20;
+    // std::clog << "framesElapsed: " << framesElapsed << std::endl;
+    // TODO speed drop
+    if (this->speedDrop) {
+        this->yPos += round(this->jumpVelocity * framesElapsed * SPEED_DROP_COEFFICIENT);
+    } else {
+        this->yPos += round(this->jumpVelocity * framesElapsed);
+    }
+    // std::clog << "yPos: " << this->yPos << std::endl;
+    this->jumpVelocity += this->GRAVITY * framesElapsed;
+    // std::clog << "jumpVelocity: " << this->jumpVelocity << std::endl;
+
+    //   TODO MINUIM HEIGHT
+
+    // Reached max height.
+    if (this->yPos < this->MAX_JUMP_HEIGHT || this->speedDrop) {
+        this->endJump();
+    }
+
+    // Back down at ground level. Jump completed.
+    if (this->yPos >= this->groundYPos) {
+        this->reset();
+        // TODO JUMP COUNT
+    }
+}
+
+void TRex::setSpeedDrop(bool opt)
+{
+    if (opt) {
+        this->speedDrop = true;
+    } else {
+        this->speedDrop = false;
+    }
 }
 
 void TRex::setDuck(bool isDucking)
 {
     if (isDucking && this->mStatus != Status::kDucking) {
-        this->ducking = true;
         this->mStatus = Status::kDucking;
     } else if (this->mStatus == Status::kDucking) {
-        this->ducking = false;
         this->mStatus = Status::kRunning;
     }
 }
 
 void TRex::reset()
 {
-    this->xPos = this->xInitialPos;
     this->yPos = this->groundYPos;
     this->jumpVelocity = 0;
-    this->jumping = false;
-    this->ducking = false;
-    // this->update(0, Trex.status.RUNNING);
     this->mStatus = Status::kRunning;
-    this->midair = false;
     this->speedDrop = false;
-    this->jumpCount = 0;
 }
 
 SDL_FRect TRex::getSrcRect() const
@@ -139,7 +118,7 @@ SDL_FRect TRex::getDestRect() const
     case Status::kRunning:
     case Status::kJumping:
     case Status::kCrashed:
-        return this->destRect;
+        return { DEST_RECT_X, this->yPos, DEST_RECT_WIDTH, DEST_RECT_HEIGHT };
     case Status::kDucking:
         return this->destRect_Ducking;
     default:
