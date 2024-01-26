@@ -35,7 +35,7 @@ void Runner::mainLoop()
     SDL_Event event;
     while (RUNNING_FLAG) {
         frameStart = SDL_GetTicks();
-
+        // std::clog << "frameStart: " << frameStart << std::endl;
         this->handleEvent(event);
         this->update(frameTime);
         // this->debugTime();
@@ -50,34 +50,32 @@ void Runner::mainLoop()
 
 void Runner::handleEvent(SDL_Event& event)
 {
-    auto onKeyDown = [&](SDL_Event& event) {
-        if (!this->crashed && !this->paused) {
-            if (!this->playing) {
-                // loadSounds();
-                this->playing = true;
-                // this->update();
+    // TODO extern DECLSPEC SDL_Window * SDLCALL SDL_GetKeyboardFocus(void);
+
+    const Uint8* keyState = SDL_GetKeyboardState(nullptr);
+
+    if (!this->crashed && !this->paused) {
+        if (!this->playing) {
+            // loadSounds();
+            this->playing = true;
+            // this->update();
+        }
+        if (keyState[SDL_SCANCODE_SPACE]) {
+            if (trex.mStatus != TRex::Status::kJumping && trex.mStatus != TRex::Status::kDucking) {
+                // playSound(SOUND_BUTTON_PRESS);
+                this->trex.startJump(this->currentSpeed);
             }
-            switch (event.key.keysym.sym) {
-            case SDLK_SPACE:
-                if (trex.mStatus != TRex::Status::kJumping && trex.mStatus != TRex::Status::kDucking) {
-                    // playSound(SOUND_BUTTON_PRESS);
-                    this->trex.startJump(this->currentSpeed);
+        } else if (keyState[SDL_SCANCODE_DOWN]) {
+            if (this->playing) {
+                if (this->trex.mStatus == TRex::Status::kJumping) {
+                    this->trex.setSpeedDrop(true);
+                } else if (trex.mStatus == TRex::Status::kRunning) {
+                    this->trex.setDuck(true);
                 }
-                break;
-            case SDLK_DOWN:
-                if (this->playing) {
-                    if (this->trex.mStatus == TRex::Status::kJumping) {
-                        this->trex.setSpeedDrop(true);
-                    } else if (trex.mStatus == TRex::Status::kRunning) {
-                        this->trex.setDuck(true);
-                    }
-                }
-                break;
-            default:
-                break;
             }
         }
-    };
+    }
+
     auto onKeyUp = [&](SDL_Event& event) {
         bool isJumpKey = event.key.keysym.sym == SDLK_SPACE;
 
@@ -93,21 +91,14 @@ void Runner::handleEvent(SDL_Event& event)
             // this->play();
         }
     };
-    while (SDL_PollEvent(&event) != 0) {
+
+    if (SDL_PollEvent(&event) != 0) {
         switch (event.type) {
         case SDL_EVENT_QUIT:
             this->RUNNING_FLAG = false;
             break;
-        case SDL_EVENT_KEY_DOWN:
-            // std::clog << "key down"
-                    //   << "(" << event.key.keysym.sym << ")" << std::endl;
-            onKeyDown(event);
-            break;
         case SDL_EVENT_KEY_UP:
-            // std::clog << "key up"
-                    //   << "(" << event.key.keysym.sym << ")" << std::endl;
             onKeyUp(event);
-            break;
         default:
             break;
         }
