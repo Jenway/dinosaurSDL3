@@ -1,11 +1,12 @@
 #if !defined(__TRex_HPP__)
 #define __TRex_HPP__
-#include <ITexture.h>
+#include <IDrawable.hpp>
 #include <SDL3/SDL_rect.h>
 #include <SDL_render.h>
 #include <SDL_stdinc.h>
+#include <array>
 
-class TRex {
+class TRex : public IDrawable {
 public:
     enum class Status {
         kRunning,
@@ -13,35 +14,37 @@ public:
         kDucking,
         kCrashed,
     };
-    TRex() = delete;
-    TRex(ITexture& sprite)
-        : sprite { sprite }
-    {
-    }
+    TRex() = default;
     ~TRex() = default;
 
-    void update(double deltaTime, Status opt_status);
+    void update(double deltaTime);
 
     void startJump(double speed);
     void updateJump(double deltaTime);
     void endJump();
+
     void setSpeedDrop();
     void setDuck(bool isDucking);
+
     void reset();
 
-    const SDL_FRect* getSrc();
-    const SDL_FRect* getDest() { return &this->destRect; }
+    [[nodiscard]] SDL_FRect getSrcRect() const override;
+    [[nodiscard]] SDL_FRect getDestRect() const override;
 
 private:
-    static constexpr SDL_FRect srcRects[] = {
-        { 76, 6, 88, 94 }, // LOGO steady1
+    static constexpr std::array<SDL_FRect, 10> srcRects = {
+        SDL_FRect { 76, 6, 88, 94 }, // LOGO steady1
         { 1678, 2, 88, 94 }, //  wating1
         { 44, 2, 88, 94 }, // wating2
         { 1854, 2, 88, 94 }, // running1
         { 1942, 2, 88, 94 }, // running2
-        { 220, 2, 88, 94 }, // crashed1
+        { 2030, 2, 88, 94 }, // crashed1
+        { 2119, 2, 88, 94 }, // crashed2
+        { 2206, 36, 118, 60 }, // ducking 1
+        { 2324, 36, 118, 60 } // ducking 2
     };
     SDL_FRect destRect = { 100, 300, 88 * 2, 94 * 2 };
+    SDL_FRect destRect_Ducking = { 100, 300 + 34 * 2, 118 * 2, 60 * 2 };
     static constexpr Uint32 mFrameDelay = 300 / 60;
     static constexpr int mFrameCount = 2;
 
@@ -59,7 +62,6 @@ public:
     bool speedDrop = false;
 
 private:
-    ITexture& sprite;
     Status mStatus = Status::kRunning;
     double minJumpHeight = 120;
 
@@ -77,5 +79,10 @@ private:
 
     int currentFrame = 0;
     Uint32 mTimer = 0;
+
+    // DEBUG
+
+public:
+    void MODIFY_STATUS(Status status) { this->mStatus = status; }
 };
 #endif // __TRex_HPP__

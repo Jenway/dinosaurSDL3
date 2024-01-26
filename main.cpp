@@ -1,4 +1,4 @@
-#include <Runner.h>
+#include <Runner.hpp>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_log.h>
@@ -32,7 +32,7 @@ private:
     std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)> renderer;
     std::unique_ptr<Runner> runner;
 
-    bool running;
+    bool running { true };
 };
 
 int main(int argc, char* argv[])
@@ -45,7 +45,6 @@ int main(int argc, char* argv[])
 SDL_Application::SDL_Application()
     : window(nullptr, SDL_DestroyWindow)
     , renderer(nullptr, SDL_DestroyRenderer)
-    , running(true)
 {
     try {
         this->init();
@@ -56,7 +55,7 @@ SDL_Application::SDL_Application()
         SDL_Log("Failed to initialize SDL: unknown error");
         throw;
     }
-    this->runner.reset(new Runner(*this->window, this->renderer.get()));
+    this->runner = std::make_unique<Runner>(*this->window, this->renderer.get());
 }
 
 SDL_Application::~SDL_Application()
