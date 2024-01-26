@@ -2,7 +2,7 @@
 #include <iostream>
 #include <tRex.hpp>
 
-void TRex::update(float deltaTime)
+void TRex::update(float deltaTime, float SPEED)
 {
     this->mTimer += 1;
 
@@ -30,7 +30,7 @@ void TRex::startJump(float speed)
 {
     if (mStatus != Status::kJumping) {
         this->mStatus = Status::kJumping;
-        this->jumpVelocity = -INITIAL_JUMP_VELOCITY;
+        this->jumpVelocity = -INITIAL_JUMP_VELOCITY - (speed / 10);
         this->speedDrop = false;
     }
 }

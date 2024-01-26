@@ -1,5 +1,6 @@
 #if !defined(__TRex_HPP__)
 #define __TRex_HPP__
+#include <Data.h>
 #include <IDrawable.hpp>
 #include <SDL3/SDL_rect.h>
 #include <SDL_render.h>
@@ -20,8 +21,6 @@ public:
     TRex() = default;
     ~TRex() = default;
 
-    void update(float deltaTime);
-
     void startJump(float speed);
     void updateJump(float deltaTime);
     void endJump();
@@ -31,6 +30,7 @@ public:
 
     void reset();
 
+    void update(float deltaTime, float speed) override;
     [[nodiscard]] SDL_FRect getSrcRect() const override;
     [[nodiscard]] SDL_FRect getDestRect() const override;
 
@@ -51,9 +51,10 @@ private:
     };
     // SDL_FRect destRect = { 100, 300, 88 * 2, 94 * 2 };
     static constexpr float DEST_RECT_X = 100;
-    static constexpr float DEST_RECT_WIDTH = 88 * 2;
-    static constexpr float DEST_RECT_HEIGHT = 94 * 2;
-    SDL_FRect destRect_Ducking = { 100, 300 + 34 * 2, 118 * 2, 60 * 2 };
+    static constexpr float DEST_RECT_WIDTH = 88 * RATE;
+    static constexpr float DEST_RECT_HEIGHT = 94 * RATE;
+    // SDL_FRect destRect_Ducking = { 100, 300 + 34 * 2, 118 * 2, 60 * 2 };
+    SDL_FRect destRect_Ducking = { DEST_RECT_X, SCREEN_HEIGHT - 60 * RATE, 118 * RATE, 60 * RATE };
     static constexpr Uint32 mFrameDelay = 300 / 60;
     static constexpr int mFrameCount = 2;
 
@@ -66,13 +67,15 @@ private:
 
 private:
     // 加速度
-    static constexpr float INITIAL_JUMP_VELOCITY = 40; // 4X
+    static constexpr float INITIAL_JUMP_VELOCITY = 19.5 * RATE;
     static constexpr float SPEED_DROP_COEFFICIENT = 3;
-    static constexpr float GRAVITY = 2.4;
-    static constexpr float DROP_VELOCITY = 5;
-    static constexpr float MAX_JUMP_HEIGHT = 0;
+    static constexpr float GRAVITY = 1.17 * RATE;
+    static constexpr float DROP_VELOCITY = 1.95 * RATE;
+    // static constexpr float MAX_JUMP_HEIGHT = 0;
+    // static constexpr float groundYPos = 480 - 94 * 1.3;
+    static constexpr float MAX_JUMP_HEIGHT = SCREEN_HEIGHT - 3 * 94 * RATE;
 
-    static constexpr float groundYPos = 300;
+    static constexpr float groundYPos = SCREEN_HEIGHT - 94 * RATE;
 
     bool reachedMinHeight = true;
     bool speedDrop = false;
