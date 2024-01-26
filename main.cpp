@@ -1,4 +1,4 @@
-#include <Runner.hpp>
+#include <Runner.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_log.h>
@@ -20,8 +20,8 @@ private:
     void clean();
 
 private:
-    static constexpr int SCREEN_WIDTH = 640;
-    static constexpr int SCREEN_HEIGHT = 480;
+    static constexpr int SCREEN_WIDTH = 1240;
+    static constexpr int SCREEN_HEIGHT = 500;
     static constexpr const char* SCREEN_TITLE = "SDL Runner";
     static constexpr int Init_Flag = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS;
     static constexpr Uint32 SDL_CreateRenderer_Flag = SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
