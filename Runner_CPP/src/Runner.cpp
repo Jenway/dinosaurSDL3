@@ -1,4 +1,4 @@
-#include <Runner.h>
+#include <Runner.hpp>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <SDL_stdinc.h>
@@ -7,17 +7,24 @@ Runner::Runner(const SDL_Window& window, SDL_Renderer* renderer)
     : window { window }
     , renderer { renderer }
     , imageSprite(renderer, ASSETS_PATH)
-    , trex { TRex(this->imageSprite) }
+    , trex { TRex {} }
 
 {
 }
 
 void Runner::run()
 {
-    this->RUNNING_FLAG = true;
-    this->mainLoop();
+    RUNNING_FLAG = true;
+    playing = true;
+    reset();
+    mainLoop();
 }
 
+void Runner::reset()
+{
+    SDL_RenderClear(this->renderer);
+    render();
+}
 void Runner::mainLoop()
 {
     const int frameDelay = 1000 / FPS;
@@ -27,9 +34,12 @@ void Runner::mainLoop()
     SDL_Event event;
     while (RUNNING_FLAG) {
         frameStart = SDL_GetTicks();
+
         this->handleEvent(event);
         this->update(frameTime);
+        // this->debugTime();
         this->render();
+
         frameTime = SDL_GetTicks() - frameStart;
         if (frameDelay > frameTime) {
             SDL_Delay(frameDelay - frameTime);
@@ -107,16 +117,13 @@ void Runner::update(Uint32 frameTime)
 
     if (this->playing) {
         SDL_RenderClear(this->renderer);
-        if (this->trex.jumping) {
-            this->trex.updateJump(deltaTime);
-        }
+
+        this->trex.update(deltaTime);
+        // obstacles.update(deltaTime, this->currentSpeed);
     }
-    if (this->playing) {
-        this->trex.update(deltaTime, TRex::Status::kRunning);
-    }
-    // obstacles.update(deltaTime, this->currentSpeed);
 }
 void Runner::render()
 {
+    imageSprite.draw(this->trex);
     SDL_RenderPresent(this->renderer);
 }

@@ -1,16 +1,14 @@
 #include <cmath>
 #include <iostream>
-#include <tRex.h>
+#include <tRex.hpp>
 
-void TRex::update(double deltaTime, Status opt_status)
+void TRex::update(double deltaTime)
 {
-    // if (opt_status != Status::kRunning) {
-    //     this->mStatus = opt_status;
-    // }
-
     this->mTimer += 1;
+
     switch (this->mStatus) {
     case Status::kRunning:
+    case Status::kDucking:
         if (this->mTimer > this->mFrameDelay) {
             this->currentFrame = (this->currentFrame + 1) % this->mFrameCount;
             this->mTimer = 0;
@@ -20,11 +18,8 @@ void TRex::update(double deltaTime, Status opt_status)
         this->currentFrame = 0;
         this->updateJump(deltaTime);
     } break;
-    case Status::kDucking:
-        this->currentFrame = 2;
-        break;
     case Status::kCrashed:
-        this->currentFrame = 3;
+        this->currentFrame = 0;
         break;
     default:
         break;
@@ -37,7 +32,7 @@ void TRex::startJump(double speed)
         this->mStatus = Status::kJumping;
         // Tweak the jump velocity based on the speed.
         this->jumpVelocity = INITIAL_JUMP_VELOCITY - (speed / 10);
-        std::clog << "jumpVelocity: " << this->jumpVelocity << std::endl;
+        // std::clog << "jumpVelocity: " << this->jumpVelocity << std::endl;
         this->jumping = true;
         this->reachedMinHeight = false;
         this->speedDrop = false;
@@ -54,9 +49,9 @@ void TRex::updateJump(double deltaTime)
     if (this->speedDrop) {
         this->yPos += round(this->jumpVelocity * this->SPEED_DROP_COEFFICIENT * framesElapsed);
     } else {
-        std::clog << "msPerFrame: " << msPerFrame << std::endl;
-        std::clog << "framesElapsed: " << framesElapsed << std::endl;
-        std::clog << "jumpVelocity: " << this->jumpVelocity << std::endl;
+        // std::clog << "msPerFrame: " << msPerFrame << std::endl;
+        // std::clog << "framesElapsed: " << framesElapsed << std::endl;
+        // std::clog << "jumpVelocity: " << this->jumpVelocity << std::endl;
         this->yPos += round(this->jumpVelocity * framesElapsed);
         // this->yPos += this->jumpVelocity;
         this->destRect.y = this->yPos;
@@ -122,18 +117,32 @@ void TRex::reset()
     this->jumpCount = 0;
 }
 
-const SDL_FRect* TRex::getSrc()
+SDL_FRect TRex::getSrcRect() const
 {
     switch (this->mStatus) {
     case Status::kRunning:
-        return &srcRects[this->currentFrame + 3];
+        return srcRects[this->currentFrame + 3];
     case Status::kJumping:
-        return &srcRects[1];
+        return srcRects[1];
     case Status::kDucking:
-        return &srcRects[3];
+        return srcRects[this->currentFrame + 7];
     case Status::kCrashed:
-        return &srcRects[4];
+        return srcRects[4];
     default:
-        return nullptr;
+        throw std::runtime_error("TRex::getSrcRect() error");
+    }
+}
+SDL_FRect TRex::getDestRect() const
+{
+
+    switch (this->mStatus) {
+    case Status::kRunning:
+    case Status::kJumping:
+    case Status::kCrashed:
+        return this->destRect;
+    case Status::kDucking:
+        return this->destRect_Ducking;
+    default:
+        throw std::runtime_error("TRex::getSrcRect() error");
     }
 }
