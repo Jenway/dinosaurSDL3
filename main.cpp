@@ -1,3 +1,4 @@
+#include <Data.h>
 #include <Runner.hpp>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
@@ -20,8 +21,6 @@ private:
     void clean();
 
 private:
-    static constexpr int SCREEN_WIDTH = 1240;
-    static constexpr int SCREEN_HEIGHT = 500;
     static constexpr const char* SCREEN_TITLE = "SDL Runner";
     static constexpr int Init_Flag = SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS;
     static constexpr Uint32 SDL_CreateRenderer_Flag = SDL_RENDERER_SOFTWARE | SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
@@ -81,7 +80,7 @@ void SDL_Application::init()
     }
 
     // Create window
-    this->window.reset(SDL_CreateWindow(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE));
+    this->window.reset(SDL_CreateWindow(SCREEN_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE));
     if (this->window == nullptr) {
         throw std::runtime_error("Window could not be created! SDL Error: " + std::string(SDL_GetError()));
     }

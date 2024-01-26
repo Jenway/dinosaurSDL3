@@ -9,6 +9,7 @@ Runner::Runner(const SDL_Window& window, SDL_Renderer* renderer)
     , renderer { renderer }
     , imageSprite(renderer, ASSETS_PATH)
     , trex { TRex {} }
+    , horizon { Horizon {} }
 
 {
 }
@@ -54,13 +55,17 @@ void Runner::handleEvent(SDL_Event& event)
 
     const Uint8* keyState = SDL_GetKeyboardState(nullptr);
 
+    if (keyState[SDL_SCANCODE_ESCAPE]) {
+        this->RUNNING_FLAG = false;
+    }
+
     if (!this->crashed && !this->paused) {
         if (!this->playing) {
             // loadSounds();
             this->playing = true;
             // this->update();
         }
-        if (keyState[SDL_SCANCODE_SPACE]) {
+        if (keyState[SDL_SCANCODE_SPACE] || keyState[SDL_SCANCODE_UP]) {
             if (trex.mStatus != TRex::Status::kJumping && trex.mStatus != TRex::Status::kDucking) {
                 // playSound(SOUND_BUTTON_PRESS);
                 this->trex.startJump(this->currentSpeed);
@@ -114,12 +119,22 @@ void Runner::update(Uint32 frameTime)
     if (this->playing) {
         SDL_RenderClear(this->renderer);
 
-        this->trex.update(deltaTime);
-        // obstacles.update(deltaTime, this->currentSpeed);
+        this->trex.update(deltaTime, this->currentSpeed);
+        this->horizon.update(deltaTime, this->currentSpeed);
+        if (this->horizon.checkCollision(trex.getDestRect())) {
+            this->crashed = true;
+            this->playing = false;
+            trex.mStatus = TRex::Status::kCrashed;
+            // playSound(SOUND_HIT);
+            // vibrate(200);
+            // this->stop();
+        }
     }
 }
 void Runner::render()
 {
+    horizon.draw(imageSprite);
     imageSprite.draw(this->trex);
+
     SDL_RenderPresent(this->renderer);
 }

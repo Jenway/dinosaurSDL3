@@ -6,6 +6,7 @@
 
 class IDrawable {
 public:
+    virtual void update(float deltaTime, float speed) = 0;
     [[nodiscard]] virtual SDL_FRect getSrcRect() const = 0;
     [[nodiscard]] virtual SDL_FRect getDestRect() const = 0;
 };
