@@ -2,7 +2,6 @@
 
 #ifndef IDRAWABLE_HPP_
 #define IDRAWABLE_HPP_
-#include <SDL3/SDL.h>
 #include <SDL_rect.h>
 
 class IDrawable {

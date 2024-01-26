@@ -2,6 +2,7 @@
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <SDL_stdinc.h>
+#include <iostream>
 
 Runner::Runner(const SDL_Window& window, SDL_Renderer* renderer)
     : window { window }
@@ -58,16 +59,16 @@ void Runner::handleEvent(SDL_Event& event)
             }
             switch (event.key.keysym.sym) {
             case SDLK_SPACE:
-                if (!this->trex.jumping && !this->trex.ducking) {
+                if (trex.mStatus != TRex::Status::kJumping && trex.mStatus != TRex::Status::kDucking) {
                     // playSound(SOUND_BUTTON_PRESS);
                     this->trex.startJump(this->currentSpeed);
                 }
                 break;
             case SDLK_DOWN:
                 if (this->playing) {
-                    if (this->trex.jumping) {
-                        this->trex.setSpeedDrop();
-                    } else if (!this->trex.jumping && !this->trex.ducking) {
+                    if (this->trex.mStatus == TRex::Status::kJumping) {
+                        this->trex.setSpeedDrop(true);
+                    } else if (trex.mStatus == TRex::Status::kRunning) {
                         this->trex.setDuck(true);
                     }
                 }
@@ -80,10 +81,10 @@ void Runner::handleEvent(SDL_Event& event)
     auto onKeyUp = [&](SDL_Event& event) {
         bool isJumpKey = event.key.keysym.sym == SDLK_SPACE;
 
-        if (this->playing && isJumpKey) {
+        if (this->trex.mStatus == TRex::Status::kRunning && isJumpKey) {
             this->trex.endJump();
-        } else if (this->trex.ducking) {
-            this->trex.speedDrop = false;
+        } else if (trex.mStatus == TRex::Status::kDucking) {
+            this->trex.setSpeedDrop(false);
             this->trex.setDuck(false);
         } else if (this->crashed) {
 
@@ -98,9 +99,13 @@ void Runner::handleEvent(SDL_Event& event)
             this->RUNNING_FLAG = false;
             break;
         case SDL_EVENT_KEY_DOWN:
+            // std::clog << "key down"
+                    //   << "(" << event.key.keysym.sym << ")" << std::endl;
             onKeyDown(event);
             break;
         case SDL_EVENT_KEY_UP:
+            // std::clog << "key up"
+                    //   << "(" << event.key.keysym.sym << ")" << std::endl;
             onKeyUp(event);
             break;
         default:
