@@ -17,8 +17,8 @@ else()
     # 1. Look for a SDL3 package,
     # 2. look for the SDL3-shared component, and
     # 3. fail if the shared component cannot be found.
-    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
-    find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-shared)
+    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-static)
+    find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-static)
 endif()
 
 # add include directories
@@ -29,5 +29,5 @@ aux_source_directory(src/. SRC_LIST)
 add_executable(${PROJECT_NAME} ${SRC_LIST} main.cc)
 
 # Link to the actual SDL3 library.
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_image::SDL3_image)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3-static)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_image::SDL3_image-static)
