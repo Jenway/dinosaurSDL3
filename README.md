@@ -1,6 +1,6 @@
-# dinosaurSDL3
+# dinosaurSDL2
 
-小恐龙🦖 made with SDL3
+小恐龙🦖 made with SDL2
 
 ## 说明
 
@@ -16,21 +16,18 @@
 
 ## 依赖
 
-- SDL3
-- SDL3_image
-- CMake
+- SDL2
+- SDL2_image
+- xmake
 
 ## 编译
 
-```bash
-mkdir build
-cd build
-cmake ..
-ninja
-```
-
-or if you prefer to use 'xmake'
+prefer to use 'xmake'
 
 ```bash
-xmake
+xmake build
 ```
+
+## 运行
+
+由于 SDL 的机制，确保命令执行路径与 `assets` 目录同级
