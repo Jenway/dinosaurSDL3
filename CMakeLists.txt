@@ -8,7 +8,7 @@ option(MYGAME_VENDORED "Use vendored libraries" OFF)
 set(CMAKE_CXX_STANDARD 17)
 
 # Create compile_commands.json for clangd
-set (CMAKE_EXPORT_COMPILECOMMANDS ON)
+set (CMAKE_EXPORT_COMPILECOMMANDS True)
 
 if(MYGAME_VENDORED)
     # This assumes you have added SDL as a submodule in vendored/SDL

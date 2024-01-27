@@ -17,16 +17,37 @@ Runner::Runner(const SDL_Window& window, SDL_Renderer* renderer)
 void Runner::run()
 {
     RUNNING_FLAG = true;
-    playing = true;
-    reset();
+    horizon.clear();
+    SDL_RenderClear(this->renderer);
+    render();
+    crashed = false;
+    playing = false;
+    paused = true;
     mainLoop();
 }
 
 void Runner::reset()
 {
+    trex.reset();
+    horizon.clear();
     SDL_RenderClear(this->renderer);
     render();
+    crashed = false;
+    paused = false;
+    playing = false;
 }
+
+void Runner::play()
+{
+    if (!crashed) {
+        paused = false;
+        playing = true;
+    } else {
+        reset();
+        playing = false;
+    }
+}
+
 void Runner::mainLoop()
 {
     const int frameDelay = 1000 / FPS;
@@ -63,6 +84,7 @@ void Runner::handleEvent(SDL_Event& event)
         if (!this->playing) {
             // loadSounds();
             this->playing = true;
+
             // this->update();
         }
         if (keyState[SDL_SCANCODE_SPACE] || keyState[SDL_SCANCODE_UP]) {
@@ -78,6 +100,14 @@ void Runner::handleEvent(SDL_Event& event)
                     this->trex.setDuck(true);
                 }
             }
+        }
+    } else if (this->crashed) {
+        if (keyState[SDL_SCANCODE_SPACE] || keyState[SDL_SCANCODE_UP]) {
+            this->reset();
+        }
+    } else if (this->paused) {
+        if (keyState[SDL_SCANCODE_SPACE] || keyState[SDL_SCANCODE_UP]) {
+            this->play();
         }
     }
 
@@ -121,7 +151,7 @@ void Runner::update(Uint32 frameTime)
 
         this->trex.update(deltaTime, this->currentSpeed);
         this->horizon.update(deltaTime, this->currentSpeed);
-        if (this->horizon.checkCollision(trex.getDestRect())) {
+        if (this->horizon.checkCollision(trex.getCollisionBox())) {
             this->crashed = true;
             this->playing = false;
             trex.mStatus = TRex::Status::kCrashed;
@@ -133,6 +163,17 @@ void Runner::update(Uint32 frameTime)
 }
 void Runner::render()
 {
+    // auto DrawRect = [&](const SDL_FRect& rect) {
+    //     SDL_SetRenderDrawColor(this->renderer, 0xFF, 0x35, 0x67, 0xFF);
+    //     SDL_RenderRect(this->renderer, &rect);
+    //     SDL_SetRenderDrawColor(this->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+    // };
+    // DrawRect(this->trex.getCollisionBox());
+    // std::clog << "trex.getCollisionBox(): " << this->trex.getCollisionBox().x << ", " << this->trex.getCollisionBox().y << ", " << this->trex.getCollisionBox().w << ", " << this->trex.getCollisionBox().h << std::endl;
+    // for (auto& o : this->horizon.obstacles) {
+    //     DrawRect(o.getCollisionBox());
+    // }
+
     horizon.draw(imageSprite);
     imageSprite.draw(this->trex);
 

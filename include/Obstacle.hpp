@@ -1,9 +1,10 @@
 
+#include <SDL_rect.h>
 #if !defined(__OBSTACLE_HPP__)
 #define __OBSTACLE_HPP__
-#include <Data.h>
 #include <IDrawable.hpp>
 #include <SDL_stdinc.h>
+#include <Utils.hpp>
 #include <array>
 #include <iostream>
 
@@ -23,28 +24,27 @@ public:
     Obstacle() = delete;
     Obstacle(Type type)
         : mType { type }
-        , xPos { SCREEN_WIDTH }
         , yPos { SCREEN_HEIGHT - srcRects[static_cast<int>(this->mType)].h * RATE }
         , width { srcRects[static_cast<int>(this->mType)].w * RATE }
         , height { srcRects[static_cast<int>(this->mType)].h * RATE }
     {
+        xPos = SCREEN_WIDTH + 2 * width;
     }
     ~Obstacle() = default;
     bool remove { false };
     [[nodiscard]] bool isVisible() const
     {
-        std::clog << "Obstacle::isVisible() -> xPos: " << this->xPos << " width: " << this->width << "\n";
-        if ((this->xPos + this->width) > 0) {
-            std::clog << "Obstacle::isVisible() -> true\n";
-        } else {
-            std::clog << "Obstacle::isVisible() -> false\n";
-        }
         return (this->xPos + this->width) > 0;
     }
 
     void update(float deltaTime, float speed) override;
     [[nodiscard]] SDL_FRect getSrcRect() const override;
     [[nodiscard]] SDL_FRect getDestRect() const override;
+
+    [[nodiscard]] SDL_FRect getCollisionBox() const
+    {
+        return calCollisionBox(this->getDestRect(), 98.0f);
+    }
 
 private:
     /*

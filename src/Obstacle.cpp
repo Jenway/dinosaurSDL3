@@ -1,9 +1,7 @@
-#include <Data.h>
 #include <Obstacle.hpp>
 
 void Obstacle::update(float deltaTime, float speed)
 {
-    deltaTime = deltaTime / (1000 / 60);
     this->xPos -= speed * deltaTime;
 }
 
