@@ -1,4 +1,6 @@
+#include <SDL_render.h>
 #include <Sprite.hpp>
+#include <Utils.hpp>
 #include <iostream>
 #include <stdexcept>
 
@@ -49,7 +51,6 @@ inline void Sprite::loadFromFile(std::string_view path)
     newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
 
     SDL_DestroySurface(loadedSurface);
-
     this->mTexture = newTexture;
 }
 
@@ -60,6 +61,15 @@ void Sprite::draw(IDrawable& drawable)
         SDL_FRect destRect { drawable.getDestRect() };
         SDL_RenderTexture(gRenderer, mTexture, &srcRect, &destRect);
 
+    } catch (const std::exception& e) {
+        std::clog << "Sprite::draw() : " << e.what() << std::endl;
+    }
+}
+
+void Sprite::direct_draw(SDL_FRect& src, SDL_FRect& dest)
+{
+    try {
+        SDL_RenderTexture(gRenderer, mTexture, &src, &dest);
     } catch (const std::exception& e) {
         std::clog << "Sprite::draw() : " << e.what() << std::endl;
     }

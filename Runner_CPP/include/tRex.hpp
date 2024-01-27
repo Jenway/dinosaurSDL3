@@ -1,10 +1,10 @@
 #if !defined(__TRex_HPP__)
 #define __TRex_HPP__
-#include <Data.h>
 #include <IDrawable.hpp>
 #include <SDL3/SDL_rect.h>
 #include <SDL_render.h>
 #include <SDL_stdinc.h>
+#include <Utils.hpp>
 #include <array>
 
 class TRex final : public IDrawable {
@@ -14,8 +14,9 @@ public:
         kJumping,
         kDucking,
         kCrashed,
+        kLogo
     };
-    Status mStatus = Status::kRunning;
+    Status mStatus = Status::kLogo;
 
 public:
     TRex() = default;
@@ -33,13 +34,14 @@ public:
     void update(float deltaTime, float speed) override;
     [[nodiscard]] SDL_FRect getSrcRect() const override;
     [[nodiscard]] SDL_FRect getDestRect() const override;
+    [[nodiscard]] SDL_FRect getCollisionBox() const;
 
     /*
      *Animation Frame
      */
 private:
     static constexpr std::array<SDL_FRect, 10> srcRects = {
-        SDL_FRect { 76, 6, 88, 94 }, // LOGO steady1
+        SDL_FRect { 76, 6, 88, 90 }, // LOGO steady1
         { 1678, 2, 88, 94 }, //  wating1
         { 44, 2, 88, 94 }, // wating2
         { 1854, 2, 88, 94 }, // running1
@@ -83,6 +85,7 @@ private:
     float jumpVelocity { 0 };
     int jumpCount = { 0 };
 
+    bool onAir = false;
     // DEBUG
 
 public:

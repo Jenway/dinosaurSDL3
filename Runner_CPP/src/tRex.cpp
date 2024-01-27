@@ -1,3 +1,4 @@
+#include <SDL_rect.h>
 #include <cmath>
 #include <iostream>
 #include <tRex.hpp>
@@ -5,7 +6,11 @@
 void TRex::update(float deltaTime, float SPEED)
 {
     this->mTimer += 1;
-
+    if (this->yPos < this->groundYPos) {
+        onAir = true;
+    } else {
+        onAir = false;
+    }
     switch (this->mStatus) {
     case Status::kRunning:
     case Status::kDucking:
@@ -64,7 +69,7 @@ void TRex::updateJump(float deltaTime)
     }
 
     // Back down at ground level. Jump completed.
-    if (this->yPos >= this->groundYPos) {
+    if (this->yPos > this->groundYPos) {
         this->reset();
         // TODO JUMP COUNT
     }
@@ -99,6 +104,8 @@ void TRex::reset()
 SDL_FRect TRex::getSrcRect() const
 {
     switch (this->mStatus) {
+    case Status::kLogo:
+        return srcRects[0];
     case Status::kRunning:
         return srcRects[this->currentFrame + 3];
     case Status::kJumping:
@@ -115,6 +122,8 @@ SDL_FRect TRex::getDestRect() const
 {
 
     switch (this->mStatus) {
+    case Status::kLogo:
+        return { DEST_RECT_X, SCREEN_HEIGHT - 90 * RATE, DEST_RECT_WIDTH, 90 * RATE };
     case Status::kRunning:
     case Status::kJumping:
     case Status::kCrashed:
@@ -123,5 +132,14 @@ SDL_FRect TRex::getDestRect() const
         return this->destRect_Ducking;
     default:
         throw std::runtime_error("TRex::getSrcRect() error");
+    }
+}
+
+SDL_FRect TRex::getCollisionBox() const
+{
+    if (onAir) {
+        return calCollisionBox(this->getDestRect(), 70.0f);
+    } else {
+        return calCollisionBox(this->getDestRect(), 98.0f);
     }
 }

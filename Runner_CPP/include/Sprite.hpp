@@ -16,6 +16,7 @@ public:
     ~Sprite();
     void loadFromFile(std::string_view path);
     void draw(IDrawable& drawable);
+    void direct_draw(SDL_FRect& src, SDL_FRect& dest);
 
 private:
     SDL_Renderer* gRenderer;
