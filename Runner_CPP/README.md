@@ -1,6 +1,6 @@
-# dinosaurSDL2
+# dinosaurSDL3
 
-小恐龙🦖 made with SDL2
+小恐龙🦖 made with SDL3
 
 ## 说明
 
@@ -16,16 +16,18 @@
 
 ## 依赖
 
-- SDL2
-- SDL2_image
-- xmake
+- SDL3
+- SDL3_image
+- CMake
 
 ## 编译
 
-prefer to use 'xmake'
+确保你安装了 `SDL3`
 
 ```bash
-xmake build
+mkdir build
+cmake -S . -B ./build
+cmake --build ./build
 ```
 
 ## 运行
