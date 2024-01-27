@@ -19,6 +19,11 @@
 - Dino_C: 最早的一个，连同依赖的库 (SDL-2.26.2 , SDL2_image-2.6.2) 和动态链接库一同上传了
 - Runner_C: 次晚的一个, 用 `xmake` 构建 , 很方便 , 不过少了运行时环境
 - Runner_CPP: 最简陋的一个, 图新鲜用了还没正式发布的 `SDL3` , 直接参考官方仓库构建好 SDL 和 SDL_image 然后 `cmake install` , 就可以了
+- Dino_CPP: 试了试 SDL3 新的回调 main 方法，顺便尝试了静态编译，除此之外是一样的简陋
+
+## Release
+
+Release 中有构建好的，有单文件打包，以及自己编译的 SDL3 & SDL3-image devl 包
 
 ## License
 
