@@ -2,7 +2,7 @@
 CC = gcc
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -g -I sdl2/include
+CFLAGS = -Wall -Wextra -O3 -I sdl2/include
 
 # Library flags
 LDFLAGS = -L sdl2/lib -lSDL2main -lSDL2 -lSDL2_image
