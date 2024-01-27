@@ -2,6 +2,12 @@
 
 小恐龙🦖 made with SDL2
 
+## How to build
+
+``` bash
+make dinosaur
+```
+
 ## 这次做一个真正的 C 语言 作业
 
 考虑到期末做的五子棋所用的框架 Qt 是 C++ 语言的，和C语言大作业不大吻合。
