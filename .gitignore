@@ -1,9 +1,0 @@
-/.cache/
-/.vscode/
-/.xmake/
-/build/
-/lib/
-/include/SDL2/
-/bin/
-/share/
-/assets/
