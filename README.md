@@ -17,7 +17,7 @@
 ## 依赖
 
 - SDL3
-- SDL2_image
+- SDL3_image
 - CMake
 
 ## 编译
