@@ -8,8 +8,11 @@ SDK files.
 
 ## Build
 
-This stage only introduces the project scaffold and native build tooling.
-Gameplay code is imported in follow-up commits.
+Native desktop build:
+
+```bash
+pixi run build
+```
 
 ## Layout
 
@@ -18,3 +21,6 @@ Gameplay code is imported in follow-up commits.
 - `include/`: project headers
 - `src/`: project sources
 - `tests/`: regression tests
+
+The web build, persistence layer, and regression tests are added in later
+reconstruction commits.
