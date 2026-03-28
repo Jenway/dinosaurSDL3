@@ -1,4 +1,15 @@
+build/
+build-test/
+build-web/
+compile_commands.json
 *.o
-*.exe# pixi environments
+*.d
+*.exe
+*.wasm
+*.js
+*.html
+*.data
+
+# pixi environments
 .pixi/*
 !.pixi/config.toml
