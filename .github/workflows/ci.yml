@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pixi
+        uses: prefix-dev/setup-pixi@v0.9.4
+        with:
+          pixi-version: v0.65.0
+          cache: true
+
+      - name: Build native executable
+        run: pixi run build
+
+      - name: Run gameplay tests
+        run: pixi run test
+
+      - name: Build web bundle
+        run: pixi run build-web
+
+      - name: Upload native artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dinosaur-native
+          path: |
+            build/dinosaur.exe
+            build/SDL3.dll
+            Resources/dino.png
+            README.md
+            LICENSE
+          if-no-files-found: error
+
+      - name: Upload web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dinosaur-web
+          path: |
+            build-web/dinosaur.html
+            build-web/dinosaur.js
+            build-web/dinosaur.wasm
+            build-web/dinosaur.data
+          if-no-files-found: error

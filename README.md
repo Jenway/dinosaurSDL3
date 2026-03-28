@@ -62,6 +62,11 @@ pixi run serve-web
 
 Web high-score persistence currently uses browser `localStorage`.
 
+## CI/CD
+
+- `CI` runs native build, gameplay tests, and web build on GitHub Actions.
+- Pushing a `v*` tag triggers the release workflow and uploads native/web zip assets to a GitHub Release.
+
 ## Controls
 
 - `Space` / `W` / `Up Arrow`: jump, start, restart
