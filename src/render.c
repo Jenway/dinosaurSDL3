@@ -60,6 +60,52 @@ static const int moon_phase_output_widths[] = {20, 20, 20, 40, 20, 20, 20};
 static const float moon_wrap_span = 1040.0f;
 static const float star_wrap_span = 1080.0f;
 
+static Uint8 *render_try_load_file(const char *path, size_t *file_size)
+{
+    Uint8 *file_bytes = SDL_LoadFile(path, file_size);
+
+    if (file_bytes != NULL)
+    {
+        return file_bytes;
+    }
+
+    return NULL;
+}
+
+static Uint8 *render_load_file_with_search_paths(const char *path, size_t *file_size)
+{
+    Uint8 *file_bytes = NULL;
+    char candidate[1024];
+    const char *base_path = SDL_GetBasePath();
+
+    file_bytes = render_try_load_file(path, file_size);
+    if (file_bytes != NULL)
+    {
+        return file_bytes;
+    }
+
+    if (base_path == NULL)
+    {
+        return NULL;
+    }
+
+    SDL_snprintf(candidate, sizeof(candidate), "%s%s", base_path, path);
+    file_bytes = render_try_load_file(candidate, file_size);
+    if (file_bytes != NULL)
+    {
+        return file_bytes;
+    }
+
+    SDL_snprintf(candidate, sizeof(candidate), "%s../%s", base_path, path);
+    file_bytes = render_try_load_file(candidate, file_size);
+    if (file_bytes != NULL)
+    {
+        return file_bytes;
+    }
+
+    return NULL;
+}
+
 static SDL_Texture *render_load_texture(SDL_Renderer *renderer, const char *path)
 {
     SDL_Surface *surface;
@@ -71,10 +117,10 @@ static SDL_Texture *render_load_texture(SDL_Renderer *renderer, const char *path
     int height;
     int channels;
 
-    file_bytes = SDL_LoadFile(path, &file_size);
+    file_bytes = render_load_file_with_search_paths(path, &file_size);
     if (file_bytes == NULL)
     {
-        SDL_Log("Could not read texture file: %s", SDL_GetError());
+        SDL_Log("Could not read texture file '%s': %s", path, SDL_GetError());
         return NULL;
     }
 

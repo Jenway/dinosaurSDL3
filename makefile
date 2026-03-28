@@ -31,9 +31,11 @@ WEB_TARGET = $(WEB_TARGET_DIR)/dinosaur.html
 TEST_TARGET = $(TEST_TARGET_DIR)/test_game.exe
 WEB_ENV = set EM_NODE_JS=node &&
 MKDIR_BUILD = if not exist "$(TARGET_DIR)" mkdir "$(TARGET_DIR)"
+MKDIR_BUILD_RESOURCES = if not exist "$(TARGET_DIR)\\Resources" mkdir "$(TARGET_DIR)\\Resources"
 MKDIR_WEB = if not exist "$(WEB_TARGET_DIR)" mkdir "$(WEB_TARGET_DIR)"
 MKDIR_TEST = if not exist "$(TEST_TARGET_DIR)" mkdir "$(TEST_TARGET_DIR)"
 COPY_RUNTIME = for /f "delims=" %%I in ('where SDL3.dll') do @copy /Y "%%I" "$(TARGET_DIR)" >NUL
+COPY_RESOURCES = $(MKDIR_BUILD_RESOURCES) && copy /Y "Resources\\dino.png" "$(TARGET_DIR)\\Resources\\dino.png" >NUL
 RM_BUILD = if exist "$(TARGET_DIR)" rmdir /S /Q "$(TARGET_DIR)"
 RM_WEB = if exist "$(WEB_TARGET_DIR)" rmdir /S /Q "$(WEB_TARGET_DIR)"
 RM_TEST = if exist "$(TEST_TARGET_DIR)" rmdir /S /Q "$(TEST_TARGET_DIR)"
@@ -44,20 +46,22 @@ WEB_TARGET = $(WEB_TARGET_DIR)/dinosaur.html
 TEST_TARGET = $(TEST_TARGET_DIR)/test_game
 WEB_ENV = EM_NODE_JS=node
 MKDIR_BUILD = mkdir -p "$(TARGET_DIR)"
+MKDIR_BUILD_RESOURCES = mkdir -p "$(TARGET_DIR)/Resources"
 MKDIR_WEB = mkdir -p "$(WEB_TARGET_DIR)"
 MKDIR_TEST = mkdir -p "$(TEST_TARGET_DIR)"
 COPY_RUNTIME = :
+COPY_RESOURCES = $(MKDIR_BUILD_RESOURCES) && cp -f "Resources/dino.png" "$(TARGET_DIR)/Resources/dino.png"
 RM_BUILD = rm -rf "$(TARGET_DIR)"
 RM_WEB = rm -rf "$(WEB_TARGET_DIR)"
 RM_TEST = rm -rf "$(TEST_TARGET_DIR)"
 RUN_TEST = ./$(TEST_TARGET)
 endif
 
-.PHONY: dinosaur web test clean clean-web clean-test copy_dlls
+.PHONY: dinosaur web test clean clean-web clean-test copy_dlls copy_resources
 
 -include $(DEPS) $(WEB_DEPS) $(TEST_DEPS)
 
-dinosaur: $(TARGET) copy_dlls
+dinosaur: $(TARGET) copy_dlls copy_resources
 
 web: $(WEB_TARGET)
 
@@ -99,6 +103,9 @@ $(TEST_TARGET_DIR):
 
 copy_dlls: | $(TARGET_DIR)
 	$(COPY_RUNTIME)
+
+copy_resources: | $(TARGET_DIR)
+	$(COPY_RESOURCES)
 
 clean:
 	$(RM_BUILD)
