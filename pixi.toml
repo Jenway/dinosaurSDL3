@@ -7,7 +7,10 @@ version = "0.1.0"
 
 [tasks]
 build = "make dinosaur"
+build-web = "make web"
+serve-web = "emrun --no_browser --port 8080 build-web/dinosaur.html"
 compiledb = "compiledb --overwrite --full-path make dinosaur"
+test = "make test"
 
 [dependencies]
 sdl3 = ">=3.4.2,<4"
@@ -16,3 +19,4 @@ pkgconfig = ">=1.6.0,<2"
 gcc = ">=15.2.0,<15.3"
 compiledb = ">=0.10.1,<0.11"
 clang-format = ">=22.1.0,<23"
+emscripten = ">=4.0.9,<5"
