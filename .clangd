@@ -1,0 +1,7 @@
+CompileFlags:
+  CompilationDatabase: .
+---
+If:
+  PathMatch: .*\.h
+CompileFlags:
+  Add: [-xc]

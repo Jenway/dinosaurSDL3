@@ -1,0 +1,18 @@
+[workspace]
+authors = ["Jenway <JenwayHere@Gmail.com>"]
+channels = ["conda-forge"]
+name = "Dino_C"
+platforms = ["win-64"]
+version = "0.1.0"
+
+[tasks]
+build = "make dinosaur"
+compiledb = "compiledb --overwrite --full-path make dinosaur"
+
+[dependencies]
+sdl3 = ">=3.4.2,<4"
+make = ">=4.4.1,<5"
+pkgconfig = ">=1.6.0,<2"
+gcc = ">=15.2.0,<15.3"
+compiledb = ">=0.10.1,<0.11"
+clang-format = ">=22.1.0,<23"

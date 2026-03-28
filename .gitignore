@@ -1,2 +1,4 @@
 *.o
-*.exe
+*.exe# pixi environments
+.pixi/*
+!.pixi/config.toml
